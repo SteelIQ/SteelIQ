@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>SteelIQ — Intelligent Structural Engineering Platform</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,9 +12,9 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#2563EB",
-                        secondary: "#38BDF8",
-                        dark: "#030712"
+                        primary: "#2563eb",
+                        secondary: "#0f172a",
+                        accent: "#38bdf8"
                     }
                 }
             }
@@ -24,1399 +22,381 @@
     </script>
 
     <style>
-        html {
-            scroll-behavior: smooth;
+        html{
+            scroll-behavior:smooth;
         }
 
-        body {
-            background: #030712;
-            font-family: Inter, sans-serif;
-            overflow-x: hidden;
+        body{
+            background:#ffffff;
         }
 
-        .grid-bg {
-            background-image:
-                linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px);
-
-            background-size: 45px 45px;
+        .sharp-card {
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
         }
 
-        .blur1 {
-            position: absolute;
-            width: 700px;
-            height: 700px;
-            left: -250px;
-            top: -250px;
-            background: #2563EB;
-            filter: blur(180px);
-            opacity: .18;
-            border-radius: 999px;
+        .sharp-card-dark {
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
         }
 
-        .blur2 {
-            position: absolute;
-            right: -250px;
-            bottom: -250px;
-            width: 700px;
-            height: 700px;
-            background: #0EA5E9;
-            filter: blur(180px);
-            opacity: .18;
-            border-radius: 999px;
+        .text-muted {
+            color: #6b7280;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, .05);
-            backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, .08);
-        }
-
-        .heroGlow {
-            box-shadow: 0 0 80px rgba(37, 99, 235, .25);
-        }
-
-        .rotateBuilding {
-
-            animation: rotate 18s linear infinite;
-
-            transform-origin: center;
-
-        }
-
-        @keyframes rotate {
-
-            from {
-                transform: rotateY(0deg);
-            }
-
-            to {
-                transform: rotateY(360deg);
-            }
-
-        }
-
-        .floating {
-
-            animation: float 5s ease-in-out infinite;
-
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-12px);
-            }
-
-        }
-
-        .gradientText {
-
-            background: linear-gradient(90deg, #38BDF8, #60A5FA, #2563EB);
-
-            -webkit-background-clip: text;
-            color: transparent;
-
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
         }
     </style>
 
 </head>
 
-<body>
+<body class="text-gray-900 overflow-x-hidden">
 
-    <div class="fixed inset-0 grid-bg -z-50"></div>
+<!-- Navbar -->
 
-    <div class="blur1"></div>
-    <div class="blur2"></div>
+<header class="sticky top-0 z-50 border-b border-gray-200 bg-white">
 
-    <!-- NAV -->
+<div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
 
-    <header class="fixed w-full z-50">
+<div class="flex items-center gap-3">
 
-        <div class="max-w-7xl mx-auto mt-5 px-5">
+<div class="brand-icon">
+S
+</div>
 
-            <div class="glass rounded-2xl px-7 py-4 flex justify-between items-center">
+<div>
 
-                <div class="flex items-center gap-4">
+<h1 class="font-bold text-xl text-gray-900">
+SteelIQ
+</h1>
 
-                    <div
-                        class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center font-bold text-xl">
+<p class="text-xs text-gray-500">
+Structural Engineering
+</p>
 
-                        S
+</div>
 
-                    </div>
+</div>
 
-                    <div>
+<nav class="hidden md:flex gap-8 text-gray-600">
 
-                        <h1 class="font-bold text-white text-xl">
+<a href="#features" class="hover:text-gray-900 font-medium text-sm">Features</a>
+<a href="#modules" class="hover:text-gray-900 font-medium text-sm">Modules</a>
+<a href="#vision" class="hover:text-gray-900 font-medium text-sm">Vision</a>
 
-                            SteelIQ
+</nav>
 
-                        </h1>
+<a href="#"
+class="px-4 py-2 border border-gray-900 bg-gray-900 hover:bg-gray-800 transition text-white font-medium text-sm">
+GitHub
+</a>
 
-                        <p class="text-xs text-gray-400">
+</div>
 
-                            Structural Engineering Platform
+</header>
 
-                        </p>
+<!-- Hero Section -->
 
-                    </div>
+<section class="max-w-7xl mx-auto px-6 py-20">
 
-                </div>
+<div class="grid lg:grid-cols-2 gap-16 items-center">
 
-                <nav class="hidden lg:flex gap-10 text-gray-300">
+<div>
 
-                    <a href="#">Home</a>
+<span class="inline-block px-3 py-1 border border-gray-300 bg-gray-50 text-gray-700 font-medium text-xs uppercase tracking-wide mb-6">
+Next Generation Platform
+</span>
 
-                    <a href="#">Architecture</a>
+<h1 class="text-6xl md:text-7xl font-black leading-tight text-gray-900 mb-6">
 
-                    <a href="#">Modules</a>
+Design
 
-                    <a href="#">Roadmap</a>
+<span class="text-blue-600">
+Smarter
+</span>
 
-                    <a href="#">GitHub</a>
+Structures.
 
-                </nav>
+</h1>
 
-                <a class="px-5 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-500 transition">
+<p class="text-lg text-gray-600 leading-relaxed mb-10 max-w-xl">
 
-                    Get Started
+SteelIQ helps structural engineers design reinforced concrete members, generate steel detailing, visualize reinforcement layouts, calculate quantities, and produce professional engineering documentation.
 
-                </a>
+</p>
 
-            </div>
+<div class="flex flex-wrap gap-3">
 
-        </div>
+<a href="#"
+class="px-6 py-3 bg-blue-600 hover:bg-blue-700 transition font-semibold text-white border border-blue-600">
 
-    </header>
+Get Started
 
-    <!-- HERO -->
-    <!-- ============================================= -->
-    <!-- TWO ENGINE PLATFORM -->
-    <!-- ============================================= -->
+</a>
 
-    <section class="relative py-32 overflow-hidden">
+<a href="#features"
+class="px-6 py-3 border border-gray-300 hover:border-gray-400 transition font-semibold text-gray-900">
 
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-blue-950/20 to-transparent"></div>
+Learn More
 
-        <div class="max-w-7xl mx-auto px-6 relative">
+</a>
 
-            <div class="text-center">
+</div>
 
-                <span class="px-5 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm">
+</div>
 
-                    PLATFORM ARCHITECTURE
+<!-- Right Column: Stats & Dashboard Preview -->
 
-                </span>
+<div class="space-y-6">
 
-                <h2 class="mt-8 text-5xl md:text-6xl font-black text-white">
+<!-- Stats Block -->
 
-                    Two Engineering Engines
+<div class="sharp-card-dark border p-8">
 
-                </h2>
+<h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Platform Stats</h3>
 
-                <p class="mt-6 max-w-3xl mx-auto text-lg text-slate-400 leading-8">
+<div class="space-y-4">
 
-                    SteelIQ separates structural analysis from reinforcement detailing,
-                    allowing both systems to evolve independently while sharing the same
-                    building model and project database.
+<div class="flex justify-between items-center border-b border-gray-200 pb-4">
+<span class="text-gray-600">Engineering Modules</span>
+<span class="text-3xl font-black text-blue-600">20+</span>
+</div>
 
-                </p>
+<div class="flex justify-between items-center border-b border-gray-200 pb-4">
+<span class="text-gray-600">Browser Based</span>
+<span class="text-3xl font-black text-blue-600">100%</span>
+</div>
 
-            </div>
+<div class="flex justify-between items-center">
+<span class="text-gray-600">Scalability</span>
+<span class="text-3xl font-black text-blue-600">∞</span>
+</div>
 
-            <!-- ENGINE CARDS -->
+</div>
 
-            <div class="grid lg:grid-cols-2 gap-10 mt-24">
+</div>
 
-                <!-- ===================================== -->
-                <!-- ANALYSIS ENGINE -->
-                <!-- ===================================== -->
+<!-- Dashboard Preview -->
 
-                <div
-                    class="group relative overflow-hidden rounded-3xl border border-blue-500/20 bg-white/5 backdrop-blur-xl p-10 transition duration-500 hover:border-cyan-400 hover:-translate-y-3">
+<div class="sharp-card p-6">
 
-                    <div
-                        class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl group-hover:bg-cyan-500/20 transition">
-                    </div>
+<h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Dashboard Preview</h3>
 
-                    <div class="relative">
+<div class="space-y-3">
 
-                        <div class="flex items-center gap-4">
+<div class="border border-gray-200 p-4 bg-gray-50">
+<p class="text-xs text-gray-500 mb-1">Column C-12</p>
+<div class="grid grid-cols-3 gap-2">
+<div class="text-center py-3 border border-gray-300 bg-white">
+<div class="text-2xl font-black text-gray-300">●</div>
+</div>
+<div class="text-center py-3 border border-gray-300 bg-white">
+<div class="text-2xl font-black text-gray-300">●</div>
+</div>
+<div class="text-center py-3 border border-gray-300 bg-white">
+<div class="text-2xl font-black text-gray-300">●</div>
+</div>
+</div>
+</div>
 
-                            <div
-                                class="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-3xl">
+<div class="grid grid-cols-2 gap-3">
+<div class="border border-gray-200 p-3 bg-gray-50">
+<p class="text-xs text-gray-500">Steel</p>
+<p class="text-xl font-bold text-gray-900 mt-1">612 kg</p>
+</div>
+<div class="border border-gray-200 p-3 bg-gray-50">
+<p class="text-xs text-gray-500">Concrete</p>
+<p class="text-xl font-bold text-gray-900 mt-1">4.25 m³</p>
+</div>
+</div>
 
-                                📊
+</div>
 
-                            </div>
+</div>
 
-                            <div>
+</div>
 
-                                <h3 class="text-3xl font-bold text-white">
+</section>
 
-                                    Structural Analysis
+<!-- Features Section -->
 
-                                </h3>
+<section id="features" class="border-t border-gray-200 bg-gray-50 py-20">
 
-                                <p class="text-slate-400">
+<div class="max-w-7xl mx-auto px-6">
 
-                                    Visualize how structures behave.
+<div class="mb-16">
 
-                                </p>
+<h2 class="text-5xl font-black text-gray-900 mb-4">Everything You Need</h2>
 
-                            </div>
+<p class="text-lg text-gray-600 max-w-2xl">
 
-                        </div>
+Professional tools designed for structural engineers and reinforced concrete detailing.
 
-                        <!-- SVG -->
+</p>
 
-                        <div class="mt-10 flex justify-center">
+</div>
 
-                            <svg width="280" height="220">
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                                <rect x="70" y="30" width="140" height="150" stroke="#38bdf8" fill="none"
-                                    stroke-width="2" />
+<div class="sharp-card p-8 hover:shadow-sm transition">
+<div class="text-4xl mb-4">🧮</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">Steel Calculations</h3>
+<p class="text-gray-600 text-sm">Advanced algorithms for precise structural calculations and analysis.</p>
+</div>
 
-                                <line x1="70" y1="80" x2="210" y2="80" stroke="#38bdf8" />
+<div class="sharp-card p-8 hover:shadow-sm transition">
+<div class="text-4xl mb-4">📐</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">Column Detailing</h3>
+<p class="text-gray-600 text-sm">Comprehensive reinforcement design and detailed layout generation.</p>
+</div>
 
-                                <line x1="70" y1="130" x2="210" y2="130" stroke="#38bdf8" />
+<div class="sharp-card p-8 hover:shadow-sm transition">
+<div class="text-4xl mb-4">📄</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">PDF Reports</h3>
+<p class="text-gray-600 text-sm">Professional documentation and reports generation in seconds.</p>
+</div>
 
-                                <line x1="70" y1="180" x2="210" y2="180" stroke="#38bdf8" />
+<div class="sharp-card p-8 hover:shadow-sm transition">
+<div class="text-4xl mb-4">📊</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">Live Dashboard</h3>
+<p class="text-gray-600 text-sm">Real-time project analytics and project monitoring tools.</p>
+</div>
 
-                                <line x1="105" y1="30" x2="105" y2="180" stroke="#60a5fa" />
+<div class="sharp-card p-8 hover:shadow-sm transition">
+<div class="text-4xl mb-4">📦</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">BOQ & Quantities</h3>
+<p class="text-gray-600 text-sm">Automated bill of quantities and material estimation.</p>
+</div>
 
-                                <line x1="140" y1="30" x2="140" y2="180" stroke="#60a5fa" />
+<div class="sharp-card p-8 hover:shadow-sm transition">
+<div class="text-4xl mb-4">🎯</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">Visualization</h3>
+<p class="text-gray-600 text-sm">3D reinforcement visualization and structural layouts.</p>
+</div>
 
-                                <line x1="175" y1="30" x2="175" y2="180" stroke="#60a5fa" />
+</div>
 
-                                <line x1="90" y1="10" x2="90" y2="25" stroke="#22d3ee" />
+</div>
 
-                                <polygon points="90,25 84,17 96,17" fill="#22d3ee" />
+</section>
 
-                                <line x1="140" y1="10" x2="140" y2="25" stroke="#22d3ee" />
+<!-- Modules Section -->
 
-                                <polygon points="140,25 134,17 146,17" fill="#22d3ee" />
+<section id="modules" class="py-20">
 
-                                <line x1="190" y1="10" x2="190" y2="25" stroke="#22d3ee" />
+<div class="max-w-7xl mx-auto px-6">
 
-                                <polygon points="190,25 184,17 196,17" fill="#22d3ee" />
+<div class="mb-16">
 
-                            </svg>
+<h2 class="text-5xl font-black text-gray-900 mb-4">Engineering Modules</h2>
 
-                        </div>
+<p class="text-lg text-gray-600">
+Complete suite of structural design and analysis tools.
+</p>
 
-                        <div class="grid grid-cols-2 gap-4 mt-8">
+</div>
 
-                            <div class="rounded-xl bg-slate-900/70 p-4">Columns</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Beams</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Slabs</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Footings</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Load Paths</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Moments</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Deflection</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Stress</div>
+<div class="sharp-card p-12">
 
-                        </div>
+<div class="grid md:grid-cols-4 gap-8">
 
-                    </div>
+<div class="pb-6 border-b md:border-b-0 md:border-r md:pb-0 md:pr-8 border-gray-200">
+<div class="font-bold text-lg text-gray-900 mb-2">✓ Columns</div>
+<p class="text-gray-600 text-sm">Column design, reinforcement and detailing</p>
+</div>
 
-                </div>
+<div class="pb-6 border-b md:border-b-0 md:border-r md:pb-0 md:pr-8 border-gray-200">
+<div class="font-bold text-lg text-gray-900 mb-2">✓ Beams</div>
+<p class="text-gray-600 text-sm">Beam analysis, design and reinforcement</p>
+</div>
 
-                <!-- ===================================== -->
-                <!-- STEEL ENGINE -->
-                <!-- ===================================== -->
+<div class="pb-6 border-b md:border-b-0 md:border-r md:pb-0 md:pr-8 border-gray-200">
+<div class="font-bold text-lg text-gray-900 mb-2">✓ Slabs</div>
+<p class="text-gray-600 text-sm">One-way, two-way and flat slab design</p>
+</div>
 
-                <div
-                    class="group relative overflow-hidden rounded-3xl border border-cyan-500/20 bg-white/5 backdrop-blur-xl p-10 transition duration-500 hover:border-blue-400 hover:-translate-y-3">
+<div class="pb-6 md:pb-0">
+<div class="font-bold text-lg text-gray-900 mb-2">✓ Footings</div>
+<p class="text-gray-600 text-sm">Foundation and footing design</p>
+</div>
 
-                    <div
-                        class="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl group-hover:bg-blue-500/20 transition">
-                    </div>
+<div class="pb-6 border-b md:border-b-0 md:border-r md:pb-0 md:pr-8 border-gray-200">
+<div class="font-bold text-lg text-gray-900 mb-2">✓ Staircase</div>
+<p class="text-gray-600 text-sm">Stair design and reinforcement</p>
+</div>
 
-                    <div class="relative">
+<div class="pb-6 border-b md:border-b-0 md:border-r md:pb-0 md:pr-8 border-gray-200">
+<div class="font-bold text-lg text-gray-900 mb-2">✓ Shear Walls</div>
+<p class="text-gray-600 text-sm">Lateral load design and detailing</p>
+</div>
 
-                        <div class="flex items-center gap-4">
+<div class="pb-6 border-b md:border-b-0 md:border-r md:pb-0 md:pr-8 border-gray-200">
+<div class="font-bold text-lg text-gray-900 mb-2">✓ Foundations</div>
+<p class="text-gray-600 text-sm">Deep foundation analysis</p>
+</div>
 
-                            <div
-                                class="h-16 w-16 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-3xl">
+<div class="pb-6 md:pb-0">
+<div class="font-bold text-lg text-gray-900 mb-2">✓ AI Assistant</div>
+<p class="text-gray-600 text-sm">Intelligent design guidance</p>
+</div>
 
-                                🧱
+</div>
 
-                            </div>
+</div>
 
-                            <div>
+</section>
 
-                                <h3 class="text-3xl font-bold text-white">
+<!-- Vision Section -->
 
-                                    Steel Detailing
+<section id="vision" class="border-t border-gray-200 bg-gray-50 py-20">
 
-                                </h3>
+<div class="max-w-4xl mx-auto px-6 text-center">
 
-                                <p class="text-slate-400">
+<h2 class="text-5xl font-black text-gray-900 mb-6">Engineering the Future</h2>
 
-                                    Generate constructible reinforcement.
+<p class="text-lg text-gray-600 leading-relaxed mb-10">
 
-                                </p>
+SteelIQ is building a complete structural engineering ecosystem—from intelligent calculations and reinforcement detailing to visualization, documentation, and project management. Designed for modern engineers who demand precision and efficiency.
 
-                            </div>
+</p>
 
-                        </div>
+<a href="#"
+class="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-700 transition text-white font-bold border border-blue-600">
 
-                        <div class="mt-10 flex justify-center">
+Start Building →
 
-                            <svg width="260" height="220">
+</a>
 
-                                <rect x="70" y="30" width="120" height="150" fill="none" stroke="#38bdf8"
-                                    stroke-width="2" />
+</div>
 
-                                <circle cx="90" cy="50" r="6" fill="#38bdf8" />
+</section>
 
-                                <circle cx="170" cy="50" r="6" fill="#38bdf8" />
+<!-- Footer -->
 
-                                <circle cx="90" cy="160" r="6" fill="#38bdf8" />
+<footer class="border-t border-gray-200 bg-white">
 
-                                <circle cx="170" cy="160" r="6" fill="#38bdf8" />
+<div class="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
 
-                                <rect x="80" y="40" width="100" height="130" fill="none" stroke="#60a5fa"
-                                    stroke-dasharray="6" />
+<p class="text-gray-600">
+© 2026 SteelIQ. Intelligent Structural Engineering.
+</p>
 
-                            </svg>
+<div class="text-gray-600">
+Built with HTML • Tailwind CSS
+</div>
 
-                        </div>
+</div>
 
-                        <div class="grid grid-cols-2 gap-4 mt-8">
-
-                            <div class="rounded-xl bg-slate-900/70 p-4">Columns</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Beams</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Slabs</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Footings</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Development Length</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Lap Length</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">Steel Quantity</div>
-                            <div class="rounded-xl bg-slate-900/70 p-4">BBS & PDF</div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- CENTER CONNECTION -->
-
-            <div class="hidden lg:flex justify-center mt-24">
-
-                <div
-                    class="rounded-3xl border border-blue-500/20 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 px-10 py-8 backdrop-blur-xl">
-
-                    <div class="text-center">
-
-                        <p class="text-sm uppercase tracking-widest text-cyan-300">
-
-                            Shared Project Core
-
-                        </p>
-
-                        <h3 class="mt-4 text-3xl font-bold text-white">
-
-                            One Building Model
-
-                        </h3>
-
-                        <p class="mt-5 text-slate-400 max-w-3xl">
-
-                            Every project uses the same structural components —
-                            Columns, Beams, Slabs, Footings, Foundations,
-                            Shear Walls and Staircases.
-                            Both engines operate on identical geometry,
-                            allowing future synchronization between structural analysis and reinforcement detailing.
-
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-    <!-- ==========================================================
-BUILDING ECOSYSTEM
-=========================================================== -->
-
-    <section class="relative py-32 overflow-hidden">
-
-        <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"></div>
-
-        <div class="max-w-7xl mx-auto px-6 relative">
-
-            <div class="text-center">
-
-                <span class="inline-flex px-5 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">
-
-                    ENGINEERING ECOSYSTEM
-
-                </span>
-
-                <h2 class="mt-8 text-6xl font-black text-white">
-
-                    Every Structure.
-                    Every Component.
-
-                </h2>
-
-                <p class="mt-8 max-w-3xl mx-auto text-xl text-slate-400 leading-9">
-
-                    SteelIQ is designed around the complete structural system.
-                    Every component belongs to the same intelligent project database,
-                    allowing seamless collaboration between analysis,
-                    detailing,
-                    quantity estimation,
-                    documentation,
-                    and visualization.
-
-                </p>
-
-            </div>
-
-            <!-- GRID -->
-
-            <div class="grid lg:grid-cols-4 md:grid-cols-2 gap-8 mt-24">
-
-                <!-- CARD -->
-
-                <div
-                    class="group rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 p-8 hover:border-cyan-400 transition-all duration-500 hover:-translate-y-3">
-
-                    <div class="text-6xl">🏛</div>
-
-                    <h3 class="mt-8 text-2xl font-bold text-white">
-
-                        Columns
-
-                    </h3>
-
-                    <p class="mt-4 text-slate-400 leading-7">
-
-                        Design longitudinal reinforcement,
-                        stirrups,
-                        laps,
-                        development length,
-                        quantity,
-                        and generate complete reinforcement drawings.
-
-                    </p>
-
-                    <div class="mt-8 flex flex-wrap gap-2">
-
-                        <span class="px-3 py-2 rounded-full bg-cyan-500/10 text-cyan-300 text-sm">
-
-                            Analysis
-
-                        </span>
-
-                        <span class="px-3 py-2 rounded-full bg-blue-500/10 text-blue-300 text-sm">
-
-                            Detailing
-
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <!-- CARD -->
-
-                <div
-                    class="group rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 p-8 hover:border-blue-400 transition-all duration-500 hover:-translate-y-3">
-
-                    <div class="text-6xl">🌉</div>
-
-                    <h3 class="mt-8 text-2xl font-bold text-white">
-
-                        Beams
-
-                    </h3>
-
-                    <p class="mt-4 text-slate-400 leading-7">
-
-                        Visualize bending,
-                        shear,
-                        torsion,
-                        reinforcement arrangement,
-                        anchorage
-                        and beam schedules.
-
-                    </p>
-
-                    <div class="mt-8 flex flex-wrap gap-2">
-
-                        <span class="px-3 py-2 rounded-full bg-cyan-500/10 text-cyan-300 text-sm">
-
-                            Analysis
-
-                        </span>
-
-                        <span class="px-3 py-2 rounded-full bg-blue-500/10 text-blue-300 text-sm">
-
-                            Detailing
-
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <!-- CARD -->
-
-                <div
-                    class="group rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 p-8 hover:border-cyan-400 transition-all duration-500 hover:-translate-y-3">
-
-                    <div class="text-6xl">⬜</div>
-
-                    <h3 class="mt-8 text-2xl font-bold text-white">
-
-                        Slabs
-
-                    </h3>
-
-                    <p class="mt-4 text-slate-400 leading-7">
-
-                        One-way,
-                        two-way,
-                        flat slabs,
-                        reinforcement mesh,
-                        load distribution
-                        and quantity estimation.
-
-                    </p>
-
-                    <div class="mt-8 flex flex-wrap gap-2">
-
-                        <span class="px-3 py-2 rounded-full bg-cyan-500/10 text-cyan-300 text-sm">
-
-                            Analysis
-
-                        </span>
-
-                        <span class="px-3 py-2 rounded-full bg-blue-500/10 text-blue-300 text-sm">
-
-                            Detailing
-
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <!-- CARD -->
-
-                <div
-                    class="group rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 p-8 hover:border-blue-400 transition-all duration-500 hover:-translate-y-3">
-
-                    <div class="text-6xl">🦶</div>
-
-                    <h3 class="mt-8 text-2xl font-bold text-white">
-
-                        Footings
-
-                    </h3>
-
-                    <p class="mt-4 text-slate-400 leading-7">
-
-                        Isolated,
-                        combined,
-                        strap,
-                        raft footings,
-                        bearing pressure,
-                        steel optimization
-                        and detailing.
-
-                    </p>
-
-                    <div class="mt-8 flex flex-wrap gap-2">
-
-                        <span class="px-3 py-2 rounded-full bg-cyan-500/10 text-cyan-300 text-sm">
-
-                            Analysis
-
-                        </span>
-
-                        <span class="px-3 py-2 rounded-full bg-blue-500/10 text-blue-300 text-sm">
-
-                            Detailing
-
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <!-- CARD -->
-
-                <div
-                    class="group rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 p-8 hover:border-cyan-400 transition-all duration-500 hover:-translate-y-3">
-
-                    <div class="text-6xl">🧱</div>
-
-                    <h3 class="mt-8 text-2xl font-bold text-white">
-
-                        Shear Walls
-
-                    </h3>
-
-                    <p class="mt-4 text-slate-400">
-
-                        Core walls,
-                        boundary elements,
-                        ductile detailing,
-                        wall reinforcement
-                        and stability checks.
-
-                    </p>
-
-                </div>
-
-                <!-- CARD -->
-
-                <div
-                    class="group rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 p-8 hover:border-blue-400 transition-all duration-500 hover:-translate-y-3">
-
-                    <div class="text-6xl">🏗</div>
-
-                    <h3 class="mt-8 text-2xl font-bold text-white">
-
-                        Foundations
-
-                    </h3>
-
-                    <p class="mt-4 text-slate-400">
-
-                        Pile caps,
-                        combined systems,
-                        raft foundations,
-                        pedestals,
-                        soil interaction
-                        and reinforcement.
-
-                    </p>
-
-                </div>
-
-                <!-- CARD -->
-
-                <div
-                    class="group rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 p-8 hover:border-cyan-400 transition-all duration-500 hover:-translate-y-3">
-
-                    <div class="text-6xl">🪜</div>
-
-                    <h3 class="mt-8 text-2xl font-bold text-white">
-
-                        Staircases
-
-                    </h3>
-
-                    <p class="mt-4 text-slate-400">
-
-                        Dog-legged,
-                        open well,
-                        cantilever,
-                        waist slab reinforcement,
-                        landing design
-                        and detailing.
-
-                    </p>
-
-                </div>
-
-                <!-- CARD -->
-
-                <div
-                    class="group rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 p-8 hover:border-blue-400 transition-all duration-500 hover:-translate-y-3">
-
-                    <div class="text-6xl">🏢</div>
-
-                    <h3 class="mt-8 text-2xl font-bold text-white">
-
-                        Complete Buildings
-
-                    </h3>
-
-                    <p class="mt-4 text-slate-400">
-
-                        Manage entire structural projects from conceptual analysis
-                        to reinforcement,
-                        quantities,
-                        drawings,
-                        and construction documentation.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-    <!-- ==========================================================
-ENGINEERING DASHBOARD PREVIEW
-=========================================================== -->
-
-    <section class="relative py-32 overflow-hidden">
-
-        <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-blue-950/10 to-slate-950"></div>
-
-        <div class="max-w-7xl mx-auto px-6 relative">
-
-            <div class="text-center">
-
-                <span class="px-5 py-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 text-cyan-300">
-
-                    LIVE PROJECT DASHBOARD
-
-                </span>
-
-                <h2 class="mt-8 text-6xl font-black text-white">
-
-                    Everything.
-                    One Workspace.
-
-                </h2>
-
-                <p class="mt-8 max-w-3xl mx-auto text-slate-400 text-xl leading-9">
-
-                    Monitor every structural component, visualize reinforcement,
-                    review engineering calculations and generate project reports —
-                    without leaving your dashboard.
-
-                </p>
-
-            </div>
-
-            <!-- Dashboard -->
-
-            <div class="mt-24 rounded-[40px] overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl">
-
-                <div class="grid lg:grid-cols-[90px_1fr_340px] min-h-[780px]">
-
-                    <!-- ========================================= -->
-                    <!-- SIDEBAR -->
-                    <!-- ========================================= -->
-
-                    <div class="bg-slate-900 border-r border-slate-800 flex flex-col items-center py-8 gap-6">
-
-                        <div
-                            class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center text-2xl">
-
-                            S
-
-                        </div>
-
-                        <div class="space-y-5 mt-10 text-2xl">
-
-                            <div class="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">🏠</div>
-
-                            <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center">📂</div>
-
-                            <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center">📊</div>
-
-                            <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center">📐</div>
-
-                            <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center">🧾</div>
-
-                            <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center">⚙️</div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- ========================================= -->
-                    <!-- CENTER -->
-                    <!-- ========================================= -->
-
-                    <div class="p-8">
-
-                        <div class="flex justify-between items-center">
-
-                            <div>
-
-                                <h3 class="text-3xl font-bold text-white">
-
-                                    Residential Tower
-
-                                </h3>
-
-                                <p class="text-slate-500 mt-2">
-
-                                    Project Dashboard
-
-                                </p>
-
-                            </div>
-
-                            <div
-                                class="px-5 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
-
-                                ● Live Project
-
-                            </div>
-
-                        </div>
-
-                        <!-- Stats -->
-
-                        <div class="grid md:grid-cols-4 gap-5 mt-10">
-
-                            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-
-                                <p class="text-slate-500">
-
-                                    Columns
-
-                                </p>
-
-                                <h2 class="text-4xl font-bold text-white mt-3">
-
-                                    128
-
-                                </h2>
-
-                            </div>
-
-                            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-
-                                <p class="text-slate-500">
-
-                                    Steel
-
-                                </p>
-
-                                <h2 class="text-4xl font-bold text-cyan-300 mt-3">
-
-                                    84.2 t
-
-                                </h2>
-
-                            </div>
-
-                            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-
-                                <p class="text-slate-500">
-
-                                    Concrete
-
-                                </p>
-
-                                <h2 class="text-4xl font-bold text-blue-400 mt-3">
-
-                                    642 m³
-
-                                </h2>
-
-                            </div>
-
-                            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-
-                                <p class="text-slate-500">
-
-                                    Reports
-
-                                </p>
-
-                                <h2 class="text-4xl font-bold text-white mt-3">
-
-                                    18
-
-                                </h2>
-
-                            </div>
-
-                        </div>
-
-                        <!-- Building -->
-
-                        <div class="mt-10 rounded-3xl bg-slate-900 border border-slate-800 p-10">
-
-                            <div class="flex justify-between">
-
-                                <h3 class="text-2xl font-bold text-white">
-
-                                    Building Visualization
-
-                                </h3>
-
-                                <div class="flex gap-3">
-
-                                    <div class="px-4 py-2 rounded-xl bg-blue-600">
-
-                                        3D
-
-                                    </div>
-
-                                    <div class="px-4 py-2 rounded-xl bg-slate-800">
-
-                                        2D
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <div class="flex justify-center mt-12">
-
-                                <svg width="520" height="420">
-
-                                    <rect x="160" y="30" width="200" height="320" fill="none" stroke="#38bdf8"
-                                        stroke-width="2" />
-
-                                    <!-- Floors -->
-
-                                    <g stroke="#38bdf8">
-
-                                        <line x1="160" y1="80" x2="360" y2="80" />
-
-                                        <line x1="160" y1="130" x2="360" y2="130" />
-
-                                        <line x1="160" y1="180" x2="360" y2="180" />
-
-                                        <line x1="160" y1="230" x2="360" y2="230" />
-
-                                        <line x1="160" y1="280" x2="360" y2="280" />
-
-                                    </g>
-
-                                    <!-- Columns -->
-
-                                    <g stroke="#60A5FA">
-
-                                        <line x1="200" y1="30" x2="200" y2="350" />
-
-                                        <line x1="240" y1="30" x2="240" y2="350" />
-
-                                        <line x1="280" y1="30" x2="280" y2="350" />
-
-                                        <line x1="320" y1="30" x2="320" y2="350" />
-
-                                    </g>
-
-                                    <!-- Load -->
-
-                                    <g stroke="#22d3ee">
-
-                                        <line x1="200" y1="0" x2="200" y2="25" />
-
-                                        <line x1="240" y1="0" x2="240" y2="25" />
-
-                                        <line x1="280" y1="0" x2="280" y2="25" />
-
-                                        <line x1="320" y1="0" x2="320" y2="25" />
-
-                                    </g>
-
-                                </svg>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- ========================================= -->
-                    <!-- RIGHT PANEL -->
-                    <!-- ========================================= -->
-
-                    <div class="bg-slate-900 border-l border-slate-800 p-8">
-
-                        <h3 class="text-2xl font-bold text-white">
-
-                            Selected Member
-
-                        </h3>
-
-                        <div class="mt-8 rounded-2xl bg-slate-950 border border-slate-800 p-6">
-
-                            <p class="text-slate-400">
-
-                                Column C-18
-
-                            </p>
-
-                            <div class="flex justify-center mt-8">
-
-                                <svg width="180" height="220">
-
-                                    <rect x="35" y="20" width="110" height="160" fill="none" stroke="#38bdf8"
-                                        stroke-width="2" />
-
-                                    <circle cx="50" cy="35" r="5" fill="#38bdf8" />
-
-                                    <circle cx="130" cy="35" r="5" fill="#38bdf8" />
-
-                                    <circle cx="50" cy="165" r="5" fill="#38bdf8" />
-
-                                    <circle cx="130" cy="165" r="5" fill="#38bdf8" />
-
-                                    <rect x="45" y="30" width="90" height="140" fill="none" stroke="#60A5FA"
-                                        stroke-dasharray="8" />
-
-                                </svg>
-
-                            </div>
-
-                        </div>
-
-                        <div class="space-y-4 mt-8">
-
-                            <div class="flex justify-between rounded-xl bg-slate-950 p-4">
-
-                                <span class="text-slate-400">
-
-                                    Size
-
-                                </span>
-
-                                <span class="text-white">
-
-                                    450 × 600
-
-                                </span>
-
-                            </div>
-
-                            <div class="flex justify-between rounded-xl bg-slate-950 p-4">
-
-                                <span class="text-slate-400">
-
-                                    Steel
-
-                                </span>
-
-                                <span class="text-cyan-300">
-
-                                    16Ø20
-
-                                </span>
-
-                            </div>
-
-                            <div class="flex justify-between rounded-xl bg-slate-950 p-4">
-
-                                <span class="text-slate-400">
-
-                                    Stirrups
-
-                                </span>
-
-                                <span class="text-white">
-
-                                    Ø8 @100
-
-                                </span>
-
-                            </div>
-
-                            <div class="flex justify-between rounded-xl bg-slate-950 p-4">
-
-                                <span class="text-slate-400">
-
-                                    Concrete
-
-                                </span>
-
-                                <span class="text-white">
-
-                                    M30
-
-                                </span>
-
-                            </div>
-
-                            <div class="flex justify-between rounded-xl bg-slate-950 p-4">
-
-                                <span class="text-slate-400">
-
-                                    Steel Grade
-
-                                </span>
-
-                                <span class="text-white">
-
-                                    Fe500
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        <div class="mt-8">
-
-                            <button
-                                class="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 py-4 font-semibold">
-
-                                Open Member
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-    <section class="min-h-screen flex items-center">
-
-        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 px-8 pt-40">
-
-            <!-- LEFT -->
-
-            <div>
-
-                <div
-                    class="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-cyan-500/20 bg-cyan-500/10">
-
-                    <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
-
-                    <p class="text-cyan-300">
-
-                        Engineering the Future of Structural Design
-
-                    </p>
-
-                </div>
-
-                <h1 class="text-6xl md:text-7xl font-black leading-tight mt-8 text-white">
-
-                    One Platform.
-
-                    <br>
-
-                    <span class="gradientText">
-
-                        Two Engineering Engines.
-
-                    </span>
-
-                </h1>
-
-                <p class="text-xl text-gray-400 leading-9 mt-8 max-w-xl">
-
-                    SteelIQ combines structural analysis and intelligent reinforcement detailing into one unified
-                    engineering workspace.
-
-                    Design, visualize, calculate, detail, document and collaborate — from a single platform.
-
-                </p>
-
-                <div class="flex gap-5 mt-12">
-
-                    <button class="heroGlow px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 transition">
-
-                        Explore Platform
-
-                    </button>
-
-                    <button class="px-8 py-4 rounded-xl border border-gray-700 hover:border-cyan-500 transition">
-
-                        GitHub
-
-                    </button>
-
-                </div>
-
-                <div class="grid grid-cols-4 gap-6 mt-16">
-
-                    <div>
-
-                        <h2 class="text-4xl font-bold text-cyan-300">
-
-                            20+
-
-                        </h2>
-
-                        <p class="text-gray-500">
-
-                            Modules
-
-                        </p>
-
-                    </div>
-
-                    <div>
-
-                        <h2 class="text-4xl font-bold text-blue-400">
-
-                            40+
-
-                        </h2>
-
-                        <p class="text-gray-500">
-
-                            Calculations
-
-                        </p>
-
-                    </div>
-
-                    <div>
-
-                        <h2 class="text-4xl font-bold text-cyan-400">
-
-                            100+
-
-                        </h2>
-
-                        <p class="text-gray-500">
-
-                            Reports
-
-                        </p>
-
-                    </div>
-
-                    <div>
-
-                        <h2 class="text-4xl font-bold text-blue-300">
-
-                            ∞
-
-                        </h2>
-
-                        <p class="text-gray-500">
-
-                            Future
-
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- RIGHT -->
-
-            <div class="relative flex justify-center items-center">
-
-                <div class="absolute w-[550px] h-[550px] bg-blue-500/20 blur-[140px] rounded-full"></div>
-
-                <div class="glass rounded-3xl p-10 heroGlow floating">
-
-                    <svg width="420" height="520" viewBox="0 0 420 520">
-
-                        <g class="rotateBuilding">
-
-                            <rect x="120" y="50" width="180" height="370" fill="none" stroke="#38BDF8"
-                                stroke-width="2" />
-
-                            <!-- Floors -->
-
-                            <line x1="120" y1="100" x2="300" y2="100" stroke="#38BDF8" />
-
-                            <line x1="120" y1="150" x2="300" y2="150" stroke="#38BDF8" />
-
-                            <line x1="120" y1="200" x2="300" y2="200" stroke="#38BDF8" />
-
-                            <line x1="120" y1="250" x2="300" y2="250" stroke="#38BDF8" />
-
-                            <line x1="120" y1="300" x2="300" y2="300" stroke="#38BDF8" />
-
-                            <line x1="120" y1="350" x2="300" y2="350" stroke="#38BDF8" />
-
-                            <!-- Columns -->
-
-                            <line x1="165" y1="50" x2="165" y2="420" stroke="#60A5FA" />
-
-                            <line x1="210" y1="50" x2="210" y2="420" stroke="#60A5FA" />
-
-                            <line x1="255" y1="50" x2="255" y2="420" stroke="#60A5FA" />
-
-                            <!-- Load arrows -->
-
-                            <g stroke="#22D3EE">
-
-                                <line x1="140" y1="20" x2="140" y2="45" />
-
-                                <line x1="190" y1="20" x2="190" y2="45" />
-
-                                <line x1="240" y1="20" x2="240" y2="45" />
-
-                                <line x1="290" y1="20" x2="290" y2="45" />
-
-                                <polygon points="140,45 135,35 145,35" fill="#22D3EE" />
-
-                                <polygon points="190,45 185,35 195,35" fill="#22D3EE" />
-
-                                <polygon points="240,45 235,35 245,35" fill="#22D3EE" />
-
-                                <polygon points="290,45 285,35 295,35" fill="#22D3EE" />
-
-                            </g>
-
-                        </g>
-
-                    </svg>
-
-                    <div class="grid grid-cols-2 gap-5 mt-8">
-
-                        <div class="glass rounded-xl p-5">
-
-                            <p class="text-gray-400 text-sm">
-
-                                Structural Analysis
-
-                            </p>
-
-                            <h2 class="text-2xl font-bold text-cyan-300 mt-2">
-
-                                Ready
-
-                            </h2>
-
-                        </div>
-
-                        <div class="glass rounded-xl p-5">
-
-                            <p class="text-gray-400 text-sm">
-
-                                Steel Detailing
-
-                            </p>
-
-                            <h2 class="text-2xl font-bold text-blue-400 mt-2">
-
-                                Ready
-
-                            </h2>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
+</footer>
 
 </body>
-
 </html>
