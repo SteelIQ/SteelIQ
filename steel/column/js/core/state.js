@@ -173,8 +173,25 @@
       }
     });
     this._scheduleSave();
+
+    // ============================================================
+    // Workspace Refresh Routing
+    // ------------------------------------------------------------
+    // Determine what kind of engineering data changed.
+    // WorkspaceManager will refresh only the required workspaces.
+    // ============================================================
+
+    const changed = Object.keys(patch);
+
     bus.emit('state:changed', this.snapshot());
-    bus.emit('column:updated', col);
+
+    bus.emit('column:updated', {
+
+      column: col,
+
+      changed
+
+    });
   };
 
   ProjectState.prototype.getColumn = function (id) {
