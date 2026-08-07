@@ -178,6 +178,25 @@
 .roadmap-text strong { font-size: 12px; display: block; }
 .roadmap-text span { font-size: 11px; color: var(--text-muted); }
 
+/* --- Bar-mark legend table (canvas overlay) --- */
+.mark-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.mark-table th {
+  text-align: left; padding: 6px 8px;
+  background: var(--bg-panel-alt);
+  color: var(--text-muted);
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+}
+.mark-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.mark-table tr:last-child td { border-bottom: none; }
+.mark-table .swatch { width: 7px; height: 7px; border-radius: 2px; margin-right: 4px; }
+
 /* --- Toast --- */
 #toast-stack {
   position: fixed; bottom: 36px; right: 12px;
