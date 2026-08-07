@@ -111,25 +111,56 @@
    *  next lift above — this supersedes Phase 6's clear-height-only
    *  placeholder now that lap length is actually computed. */
   function longitudinalSteelWeight(column) {
-    const floorHeightM = (column.geometry.floorHeight || column.geometry.height || 0) / 1000;
-    const rows = column.bars.map((g) => {
-      const lapMm = DevLap.lapLength(g.diameter, column.steelGrade, column.concreteGrade, 'tension');
-      const lengthM = floorHeightM + lapMm / 1000;
-      const unitWt = unitWeightKgPerM(g.diameter);
-      const weightPerBar = unitWt * lengthM;
-      const totalWeight = weightPerBar * g.count;
-      return {
-        groupId: g.id, diameter: g.diameter, count: g.count, placement: g.placement,
-        unitWeightKgPerM: unitWt, floorHeightM, lapLengthMm: Math.round(lapMm), lengthM,
-        weightPerBarKg: weightPerBar, totalKg: totalWeight,
-      };
-    });
-    const totalKg = rows.reduce((s, r) => s + r.totalKg, 0);
+  const floorHeightM = (column.geometry.floorHeight || column.geometry.height || 0) / 1000;
+  const splices = column.splices || {};
+
+  const rows = column.bars.map((g) => {
+    let extraMm = 0;
+
+    if (splices.isCrankEnabled) {
+      extraMm += 0.43 * g.diameter; // 1:6 crank bend allowance
+    }
+    if (splices.isFootingDowel) {
+      extraMm += (splices.dowelEmbedmentMm || 600) + (12 * g.diameter); // Embedment + 12d L-bend
+    }
+
+    const lapMm = DevLap.lapLength(g.diameter, column.steelGrade, column.concreteGrade, 'tension');
+    const lengthM = floorHeightM + (lapMm + extraMm) / 1000;
+    const unitWt = unitWeightKgPerM(g.diameter);
+    const weightPerBar = unitWt * lengthM;
+    const totalWeight = weightPerBar * g.count;
+
     return {
-      rows, totalKg,
-      note: `Cutting length = floor-to-floor height + one tension lap length per bar (assumes the bar laps into the lift above). ${DevLap.disclosureFor(column.designCode)}`,
+      groupId: g.id,
+      diameter: g.diameter,
+      count: g.count,
+      placement: g.placement,
+      unitWeightKgPerM: unitWt,
+      floorHeightM,
+      lapLengthMm: Math.round(lapMm),
+      extraMm: Math.round(extraMm),
+      lengthM,
+      weightPerBarKg: weightPerBar,
+      totalKg: totalWeight,
     };
+  });
+
+  const totalKg = rows.reduce((s, r) => s + r.totalKg, 0);
+
+  // Dynamic note describing active cutting length parameters
+  let detailNote = 'floor-to-floor height + tension lap length';
+  if (splices.isFootingDowel) {
+    detailNote = 'floor height + footing embedment + 12d L-bend';
+  } else if (splices.isCrankEnabled) {
+    detailNote += ' + 1:6 crank offset';
   }
+
+  return {
+    rows,
+    totalKg,
+    note: `Cutting length = ${detailNote}. ${DevLap.disclosureFor(column.designCode)}`,
+  };
+}
 
   /** Tie/stirrup count and weight, now with real cutting length: ring
    *  perimeter, minus bend deduction at 4 corners (rectilinear shapes;
@@ -332,21 +363,37 @@
     const longSteel = longitudinalSteelWeight(column);
     const ties = tieWeight(column);
     const noLapZone = DevLap.noLapZoneLength(column);
+    const splices = column.splices || {};
 
-    const rows = longSteel.rows.map((r, i) => ({
-      mark: i + 1,
-      shape: 'Straight (+ lap)',
-      diameter: r.diameter,
-      nos: r.count,
-      cuttingLengthMm: Math.round(r.lengthM * 1000),
-      unitWeightKgPerM: r.unitWeightKgPerM,
-      weightPerBarKg: r.weightPerBarKg,
-      totalKg: r.totalKg,
-      detail: `${column.geometry.floorHeight || column.geometry.height}mm floor height + ${r.lapLengthMm}mm lap`,
-    }));
+    // 1. Longitudinal Bar Rows (with dynamic splice/dowel shape descriptions)
+    const rows = longSteel.rows.map((r, i) => {
+      let shapeDesc = 'Straight (+ lap)';
+      let detailDesc = `${column.geometry.floorHeight || column.geometry.height}mm floor height + ${r.lapLengthMm}mm lap`;
 
+      if (splices.isFootingDowel) {
+        shapeDesc = 'Footing Dowel (L-Bend)';
+        detailDesc += ` + ${splices.dowelEmbedmentMm || 600}mm embedment + 12d L-bend`;
+      } else if (splices.isCrankEnabled) {
+        shapeDesc = 'Cranked Bar (1:6 Bend)';
+        detailDesc += ' + 1:6 crank offset';
+      }
+
+      return {
+        mark: i + 1,
+        shape: shapeDesc,
+        diameter: r.diameter,
+        nos: r.count,
+        cuttingLengthMm: Math.round(r.lengthM * 1000),
+        unitWeightKgPerM: r.unitWeightKgPerM,
+        weightPerBarKg: r.weightPerBarKg,
+        totalKg: r.totalKg,
+        detail: detailDesc,
+      };
+    });
+
+    // 2. Outer Tie Row
     rows.push({
-      mark: longSteel.rows.length + 1,
+      mark: rows.length + 1,
       shape: `Rect./Circ. tie, ${ties.hookAngle}° hooks`,
       diameter: ties.tieDia,
       nos: ties.tieCount,
@@ -356,6 +403,38 @@
       totalKg: ties.totalKg,
       detail: `ring ${ties.ringLengthMm}mm − bends + hooks`,
     });
+
+    // 3. Internal Links / Cross-Ties Row (if enabled)
+    const intLinkType = (column.ties && column.ties.internalLinkType) || 'none';
+    if (intLinkType !== 'none') {
+      const { bars } = Geometry.resolveBars(column);
+      const linkPaths = Geometry.buildInternalLinkPaths(bars, intLinkType);
+
+      if (linkPaths.length > 0) {
+        const intDia = column.ties.internalLinkDia || ties.tieDia || 8;
+        const hookLen = DevLap.hookLength(intDia, ties.hookAngle || 135);
+
+        const singleLinkPerimeter = linkPaths.reduce((acc, p) => acc + (p.perimeterMm || 0), 0);
+        const linkCuttingLengthMm = Math.round(singleLinkPerimeter + (2 * hookLen));
+
+        const linkCount = ties.tieCount * linkPaths.length;
+        const unitWt = unitWeightKgPerM(intDia);
+        const weightPerBarKg = unitWt * (linkCuttingLengthMm / 1000);
+        const totalKg = weightPerBarKg * linkCount;
+
+        rows.push({
+          mark: rows.length + 1,
+          shape: `Internal Link (${intLinkType})`,
+          diameter: intDia,
+          nos: linkCount,
+          cuttingLengthMm: linkCuttingLengthMm,
+          unitWeightKgPerM: unitWt,
+          weightPerBarKg,
+          totalKg,
+          detail: `${linkPaths.length} link set(s) per tie level (${intLinkType})`,
+        });
+      }
+    }
 
     return {
       rows,

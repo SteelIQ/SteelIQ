@@ -120,6 +120,53 @@
     };
   }
 
+
+  /**
+   * Generates vertex paths for internal ties / cross-links.
+   */
+
+
+
+  // Add inside js/models/geometry.js
+  function buildInternalLinkPaths(bars, linkType) {
+    if (!linkType || linkType === 'none' || !bars || !bars.length) return [];
+    const paths = [];
+
+    if (linkType === 'diamond') {
+      const faceBars = bars.filter((b) => b.placement !== 'corner');
+      if (faceBars.length >= 4) {
+        const verts = faceBars.slice(0, 4).map((b) => ({ x: b.x, y: b.y }));
+        let perim = 0;
+        for (let i = 0; i < verts.length; i++) {
+          perim += dist(verts[i], verts[(i + 1) % verts.length]);
+        }
+        paths.push({ type: 'closed', vertices: verts, perimeterMm: perim });
+      }
+    } else if (linkType === 'cross_x') {
+      const leftBars = bars.filter((b) => b.placement === 'left-face');
+      const rightBars = bars.filter((b) => b.placement === 'right-face');
+      const count = Math.min(leftBars.length, rightBars.length);
+      for (let i = 0; i < count; i++) {
+        const p1 = { x: leftBars[i].x, y: leftBars[i].y };
+        const p2 = { x: rightBars[i].x, y: rightBars[i].y };
+        paths.push({ type: 'line', start: p1, end: p2, perimeterMm: dist(p1, p2) });
+      }
+    } else if (linkType === 'cross_y') {
+      const topBars = bars.filter((b) => b.placement === 'top');
+      const bottomBars = bars.filter((b) => b.placement === 'bottom');
+      const count = Math.min(topBars.length, bottomBars.length);
+      for (let i = 0; i < count; i++) {
+        const p1 = { x: topBars[i].x, y: topBars[i].y };
+        const p2 = { x: bottomBars[i].x, y: bottomBars[i].y };
+        paths.push({ type: 'line', start: p1, end: p2, perimeterMm: dist(p1, p2) });
+      }
+    }
+
+    return paths;
+  }
+
+
+
   /** Build the true-vertex outline (mm, local coordinates) for a column. */
   function buildOutline(column) {
     const g = column.geometry;
@@ -406,6 +453,6 @@
     placeAllBars, placeGroupBars, recomputeSpacing, groupDepth,
     insetShapeForGroup, nearestPointOnPolygon, nearestPointOnCircle, snapToRing,
     polygonArea, grossAreaMm2, groupPositions, resolveBars,
-    dist,
+    buildInternalLinkPaths, dist,
   };
 })(window);

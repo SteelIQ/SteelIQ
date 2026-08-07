@@ -60,78 +60,78 @@
 
   function resetView() { scale = 1; panX = 60; panY = 40; applyTransform(); }
 
- function initPanZoom() {
-  const stageEl = stage();
-  let panning = false, lastX = 0, lastY = 0, movedSinceDown = false;
+  function initPanZoom() {
+    const stageEl = stage();
+    let panning = false, lastX = 0, lastY = 0, movedSinceDown = false;
 
-  stageEl.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const rect = stageEl.getBoundingClientRect();
-    zoomBy(e.deltaY < 0 ? 1.1 : 0.9, { x: e.clientX - rect.left, y: e.clientY - rect.top });
-  }, { passive: false });
+    stageEl.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = stageEl.getBoundingClientRect();
+      zoomBy(e.deltaY < 0 ? 1.1 : 0.9, { x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }, { passive: false });
 
-  stageEl.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.hud-btn') || e.target.closest('.mark-legend-dock') || e.target.closest('.placement-tools-dock')) return;
-    panning = true; 
-    movedSinceDown = false; 
-    lastX = e.clientX; 
-    lastY = e.clientY;
-    viewport().classList.add('panning');
-  });
-
-  window.addEventListener('pointermove', (e) => {
-    // 1. Process drag pan if active
-    if (panning) {
-      if (Math.abs(e.clientX - lastX) > 2 || Math.abs(e.clientY - lastY) > 2) movedSinceDown = true;
-      panX += (e.clientX - lastX);
-      panY += (e.clientY - lastY);
+    stageEl.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.hud-btn') || e.target.closest('.mark-legend-dock') || e.target.closest('.placement-tools-dock')) return;
+      panning = true;
+      movedSinceDown = false;
       lastX = e.clientX;
       lastY = e.clientY;
-      applyTransform();
-    }
+      viewport().classList.add('panning');
+    });
 
-    // 2. Process crosshair and pointer location tracking
-    if (global.App.CadGrid) {
-      const rect = stageEl.getBoundingClientRect();
-      const isOverStage = (
-        e.clientX >= rect.left &&
-        e.clientX <= rect.right &&
-        e.clientY >= rect.top &&
-        e.clientY <= rect.bottom
-      );
-
-      if (isOverStage) {
-        const localX = e.clientX - rect.left;
-        const localY = e.clientY - rect.top;
-        const worldX = (localX - panX) / (scale * MM_TO_PX);
-        const worldY = (panY - localY) / (scale * MM_TO_PX);
-        global.App.CadGrid.setCursor({ x: worldX, y: worldY });
-      } else {
-        global.App.CadGrid.clearCursor();
+    window.addEventListener('pointermove', (e) => {
+      // 1. Process drag pan if active
+      if (panning) {
+        if (Math.abs(e.clientX - lastX) > 2 || Math.abs(e.clientY - lastY) > 2) movedSinceDown = true;
+        panX += (e.clientX - lastX);
+        panY += (e.clientY - lastY);
+        lastX = e.clientX;
+        lastY = e.clientY;
+        applyTransform();
       }
-    }
-  });
 
-  window.addEventListener('pointerup', (e) => {
-    const wasPanning = panning;
-    panning = false;
-    viewport().classList.remove('panning');
-    if (wasPanning && !movedSinceDown && !e.target.closest('[data-bar-key]')) {
-      selectedBarKey = null;
-      render();
-    }
-  });
+      // 2. Process crosshair and pointer location tracking
+      if (global.App.CadGrid) {
+        const rect = stageEl.getBoundingClientRect();
+        const isOverStage = (
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom
+        );
 
-  stageEl.addEventListener('pointerleave', () => {
-    if (global.App.CadGrid) global.App.CadGrid.clearCursor();
-  });
+        if (isOverStage) {
+          const localX = e.clientX - rect.left;
+          const localY = e.clientY - rect.top;
+          const worldX = (localX - panX) / (scale * MM_TO_PX);
+          const worldY = (panY - localY) / (scale * MM_TO_PX);
+          global.App.CadGrid.setCursor({ x: worldX, y: worldY });
+        } else {
+          global.App.CadGrid.clearCursor();
+        }
+      }
+    });
 
-  document.getElementById('hud-zoom-in').addEventListener('click', () => zoomBy(1.2));
-  document.getElementById('hud-zoom-out').addEventListener('click', () => zoomBy(0.83));
-  document.getElementById('hud-zoom-reset').addEventListener('click', resetView);
-  document.getElementById('hud-export-svg').addEventListener('click', () => exportDrawing('svg'));
-  document.getElementById('hud-export-png').addEventListener('click', () => exportDrawing('png'));
-}
+    window.addEventListener('pointerup', (e) => {
+      const wasPanning = panning;
+      panning = false;
+      viewport().classList.remove('panning');
+      if (wasPanning && !movedSinceDown && !e.target.closest('[data-bar-key]')) {
+        selectedBarKey = null;
+        render();
+      }
+    });
+
+    stageEl.addEventListener('pointerleave', () => {
+      if (global.App.CadGrid) global.App.CadGrid.clearCursor();
+    });
+
+    document.getElementById('hud-zoom-in').addEventListener('click', () => zoomBy(1.2));
+    document.getElementById('hud-zoom-out').addEventListener('click', () => zoomBy(0.83));
+    document.getElementById('hud-zoom-reset').addEventListener('click', resetView);
+    document.getElementById('hud-export-svg').addEventListener('click', () => exportDrawing('svg'));
+    document.getElementById('hud-export-png').addEventListener('click', () => exportDrawing('png'));
+  }
 
   // -------------------------------------------------------------- svg helpers
 
@@ -193,6 +193,36 @@
       group.appendChild(poly(Geometry.offsetPolygon(outline.vertices, cover + tieDia / 2), { fill: 'none', stroke: 'var(--text-muted)', 'stroke-width': 1.2 }));
     }
 
+    // --- Internal ties / cross-links layer ------------------------------
+    const intLinkType = (col.ties && col.ties.internalLinkType) || 'none';
+    if (intLinkType !== 'none') {
+      const linkPaths = Geometry.buildInternalLinkPaths(bars, intLinkType);
+      const linksLayer = svg('g', { id: 'internal-links-layer' });
+
+      linkPaths.forEach((path) => {
+        if (path.type === 'closed' && path.vertices) {
+          linksLayer.appendChild(poly(path.vertices, {
+            fill: 'none',
+            stroke: 'var(--text-muted)',
+            'stroke-width': 1.2,
+            'stroke-dasharray': '3 2'
+          }));
+        } else if (path.type === 'line' && path.start && path.end) {
+          linksLayer.appendChild(svg('line', {
+            x1: path.start.x * MM_TO_PX,
+            y1: path.start.y * MM_TO_PX,
+            x2: path.end.x * MM_TO_PX,
+            y2: path.end.y * MM_TO_PX,
+            stroke: 'var(--text-muted)',
+            'stroke-width': 1.2,
+            'stroke-dasharray': '3 2'
+          }));
+        }
+      });
+
+      group.appendChild(linksLayer);
+    }
+
     // --- Overall dimensions --------------------------------------------
     if (outline.isCircle) {
       addDim(group, 0, bbox.h * MM_TO_PX + 26, bbox.w * MM_TO_PX, `⌀ ${col.geometry.diameter} mm`);
@@ -225,10 +255,6 @@
         wrap.appendChild(svg('circle', { cx: px, cy: py, r: r + 4, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 1, 'stroke-dasharray': '3 2' }));
       }
       if (bar.manual && interactive) {
-        // small square tick = "hand-placed, not auto" — same honesty pattern
-        // used elsewhere in the app for what's automatic vs overridden.
-        // Only shown on the live canvas — a static export image doesn't
-        // need to flag editing history.
         wrap.appendChild(svg('rect', { x: px - r - 6, y: py - r - 6, width: 4, height: 4, fill: 'var(--warning)' }));
       }
       if (interactive) wireBarInteraction(wrap, col, bar);

@@ -53,13 +53,22 @@
       bars: [
         { id: nextId(), diameter: 16, count: 4, placement: 'corner', manualPositions: null },
       ],
+      // In js/models/column.js -> createColumn()
       ties: {
         diameter: 8,
         spacingMiddle: 150,
         spacingEnd: 100,
         endZoneLength: 750,
-        shape: 'rectangular',
+        shape: 'rectangular', // 'rectangular' | 'circular' | 'spiral' | 'multi-leg'
         hook: 135,
+        internalLinkType: 'none', // 'none' | 'cross_x' | 'cross_y' | 'diamond' | 'grid'
+        internalLinkDia: 8,
+      },
+      splices: {
+        type: 'lap', // 'lap' | 'coupler' | 'welded'
+        isCrankEnabled: false, // 1:6 crank offset bend
+        isFootingDowel: false, // Footing starter dowels with 90° L-bend
+        dowelEmbedmentMm: 600, // Embedment depth into footing
       },
       notes: '',
       status: 'draft', // draft | checked | warning
