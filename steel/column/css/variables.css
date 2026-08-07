@@ -8,6 +8,7 @@
 
 :root,
 [data-theme="dark"] {
+   
   /* Surfaces */
   --bg-canvas: #0F1216;      /* the drawing sheet */
   --bg-app: #14171D;         /* app chrome behind panels */
