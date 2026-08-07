@@ -1,140 +1,98 @@
-/**
- * Core Analysis Engine — Multi-Shape IS 456:2000 Compliant
- */
-(function (global) {
-  'use strict';
+/* ==========================================================================
+   Design Tokens
+   Minimal, CAD/blueprint-inspired palette. No glassmorphism, no blur, no
+   gradients-as-decoration — flat surfaces, precise hairlines, one accent
+   reserved for actions/selection and a separate "annotation" color reserved
+   for dimensions/labels, the way drafting software separates ink roles.
+   ========================================================================== */
 
-  function calculateColumn(col) {
-    const type = (col.type || 'rectangle').toLowerCase();
-    let b = 0, d = 0, A = 0, Zx = 0, Zy = 0;
-    let shapeDesc = '';
+:root,
+[data-theme="dark"] {
+  /* Surfaces */
+  --bg-canvas: #0F1216;      /* the drawing sheet */
+  --bg-app: #14171D;         /* app chrome behind panels */
+  --bg-panel: #191D24;
+  --bg-panel-alt: #1F242C;
+  --bg-inset: #10131810;
 
-    const geom = col.geometry || {};
+  /* Lines */
+  --border: #262B34;
+  --border-strong: #363D49;
+  --grid-line: #1C2027;
 
-    // 1. Shape-Specific Geometric Properties (IS 456 Basis)
-    if (type === 'circle' || type === 'circular') {
-      const dia = geom.diameter || 300;
-      b = dia; d = dia;
-      A = (Math.PI * Math.pow(dia, 2)) / 4;
-      Zx = (Math.PI * Math.pow(dia, 3)) / 32;
-      Zy = Zx;
-      shapeDesc = `Circular (Diameter D = ${dia} mm)`;
+  /* Text */
+  --text-primary: #E7EAEE;
+  --text-secondary: #9AA3B2;
+  --text-muted: #5C6472;
+  --text-on-accent: #14100D;
 
-    } else if (type === 'square') {
-      const side = geom.side || geom.width || 300;
-      b = side; d = side;
-      A = side * side;
-      Zx = (side * Math.pow(side, 2)) / 6;
-      Zy = Zx;
-      shapeDesc = `Square (Side = ${side} mm)`;
+  /* Ink roles */
+  --accent: #FF6A3D;         /* rebar orange — actions, selection, primary bars */
+  --accent-hover: #FF8259;
+  --accent-dim: #4A2A1E;
+  --annotate: #34D6C4;       /* dimension lines, leader lines, callouts */
+  --annotate-dim: #143732;
+  --danger: #FF5470;
+  --danger-dim: #3A1620;
+  --warning: #FFB454;
+  --warning-dim: #3A2C10;
+  --success: #3ECF8E;
+  --success-dim: #123227;
 
-    } else if (type === 't-shape' || type === 'tshape') {
-      // T-Shape properties (Flange width bf, web width bw, total depth d, flange thickness tf)
-      const bf = geom.flangeWidth || geom.width || 400;
-      const dTotal = geom.depth || geom.length || 500;
-      const bw = geom.webWidth || 200;
-      const tf = geom.flangeThickness || 100;
-      b = bf; d = dTotal;
+  /* Bar-diameter color ramp (distinct hues per size family) */
+  --bar-8:  #6FA8FF;
+  --bar-10: #7CD1FF;
+  --bar-12: #34D6C4;
+  --bar-16: #3ECF8E;
+  --bar-20: #E4D34F;
+  --bar-25: #FFB454;
+  --bar-32: #FF6A3D;
+  --bar-40: #FF5470;
 
-      const dw = dTotal - tf;
-      A = (bf * tf) + (bw * dw);
-      // Approximate elastic section modulus for T-section
-      Zx = (bf * Math.pow(tf, 2) / 2) + (bw * Math.pow(dw, 2) / 2); // Simplified elastic core
-      Zy = Zx * 0.8;
-      shapeDesc = `T-Shape (Bf=${bf}, d=${dTotal}, Bw=${bw}, Tf=${tf} mm)`;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --shadow-panel: none; /* flat by design */
+  --shadow-pop: 0 6px 20px rgba(0,0,0,0.45);
 
-    } else if (type === 'l-shape' || type === 'lshape') {
-      // L-Shape properties
-      const b1 = geom.width || 400;
-      const d1 = geom.depth || 400;
-      const t1 = geom.thickness || 100;
-      b = b1; d = d1;
-      A = (b1 * t1) + ((d1 - t1) * t1);
-      Zx = (b1 * Math.pow(t1, 2) / 2) + (t1 * Math.pow(d1 - t1, 2) / 3);
-      Zy = Zx;
-      shapeDesc = `L-Shape (Width=${b1}, Depth=${d1}, Thickness=${t1} mm)`;
+  --font-ui: 'Inter', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+}
 
-    } else {
-      // Rectangle, Polygon, Custom (fallback to bounding box dimensions)
-      b = geom.width || geom.b || 300;
-      d = geom.length || geom.d || 400;
-      A = b * d;
-      Zx = (b * Math.pow(d, 2)) / 6;
-      Zy = (d * Math.pow(b, 2)) / 6;
-      shapeDesc = type === 'polygon' ? `Polygon (Bounding Box ${b}×${d} mm)` : 
-                  type === 'custom' ? `Custom Section (Bounding Box ${b}×${d} mm)` : 
-                  `Rectangular (b = ${b}, d = ${d} mm)`;
-    }
+[data-theme="light"] {
+  --bg-canvas: #EDEFF2;
+  --bg-app: #F5F6F8;
+  --bg-panel: #FFFFFF;
+  --bg-panel-alt: #F7F8FA;
 
-    // 2. Extract Heights & Loads
-    const rawHeight = parseFloat(geom.height) || parseFloat(geom.clearHeight) || 3000;
-    const clearHeightMm = rawHeight > 0 ? rawHeight : 3000;
-    
-    const loads = col.loads || {};
-    const n = loads.storeys || 1;
-    const pFloor = loads.axialFloor || 0;
-    const mx = loads.mx || 0;
-    const my = loads.my || 0;
-    const k = loads.kFactor || 1.0;
+  --border: #DDE1E6;
+  --border-strong: #C5CAD2;
+  --grid-line: #E4E7EB;
 
-    const fckString = String(col.concreteGrade || '25');
-    const fck = parseInt(fckString.replace(/\D/g, ''), 10) || 25;
+  --text-primary: #1A1D23;
+  --text-secondary: #565E6B;
+  --text-muted: #8A919E;
+  --text-on-accent: #14100D;
 
-    // 3. Compute Self-Weight & Total Load
-    const volumeM3 = (A / 1000000) * (clearHeightMm / 1000);
-    const selfWeightPerFloor = volumeM3 * 25; // 25 kN/m³ for RCC
-    const P_tot = (pFloor + selfWeightPerFloor) * n; // kN
-    const P_N = P_tot * 1000; // N
+  --accent: #E85A2A;
+  --accent-hover: #D14F22;
+  --accent-dim: #FBE0D4;
+  --annotate: #0FA89E;
+  --annotate-dim: #DCF3F0;
+  --danger: #E0304F;
+  --danger-dim: #FBDCE2;
+  --warning: #C97F0E;
+  --warning-dim: #FBEBD2;
+  --success: #1FA968;
+  --success-dim: #D9F3E7;
 
-    // 4. Slenderness Check (IS 456 Cl. 25.1.2)
-    const Lu = clearHeightMm;
-    const Lex = k * Lu;
-    const Ley = k * Lu;
-    const lambda_x = Lex / d;
-    const lambda_y = Ley / b;
-    const lambda_max = Math.max(lambda_x, lambda_y);
-    const isLong = lambda_max > 12;
+  --bar-8:  #3373D6;
+  --bar-10: #1D8FBF;
+  --bar-12: #0FA89E;
+  --bar-16: #1FA968;
+  --bar-20: #A98D12;
+  --bar-25: #C97F0E;
+  --bar-32: #E85A2A;
+  --bar-40: #E0304F;
 
-    // 5. Minimum Eccentricity Check (IS 456 Cl. 25.4)
-    // e_min = Lu / 500 + D / 30, subject to a minimum of 20mm
-    const emin_x = Math.max(20, (Lu / 500) + (d / 30));
-    const emin_y = Math.max(20, (Lu / 500) + (b / 30));
-
-    // 6. Elastic Stresses (Uncracked Section Analysis)
-    const sigma_d = P_N / A;
-    const sigma_bx = Zx > 0 ? (mx * 1e6) / Zx : 0;
-    const sigma_by = Zy > 0 ? (my * 1e6) / Zy : 0;
-
-    const sig1 = sigma_d + sigma_bx + sigma_by;
-    const sig2 = sigma_d + sigma_bx - sigma_by;
-    const sig3 = sigma_d - sigma_bx + sigma_by;
-    const sig4 = sigma_d - sigma_bx - sigma_by;
-
-    const sigma_max = Math.max(sig1, sig2, sig3, sig4);
-    const sigma_min = Math.min(sig1, sig2, sig3, sig4);
-    const permissible_comp = 0.4 * fck;
-
-    let isSafe = true;
-    let failReasons = [];
-
-    if (sigma_max > permissible_comp) {
-      isSafe = false;
-      failReasons.push(`Max compressive stress (${sigma_max.toFixed(2)} MPa) exceeds permissible limit (${permissible_comp.toFixed(2)} MPa).`);
-    }
-    if (sigma_min < 0) {
-      isSafe = false;
-      failReasons.push('Tension developed in section. Uncracked elastic analysis invalid.');
-    }
-
-    return {
-      type, shapeDesc, b, d, A, P_tot, P_N, Lu, Lex, Ley, 
-      lambda_x, lambda_y, lambda_max, isLong, emin_x, emin_y,
-      selfWeightPerFloor, pFloor, mx, my,
-      Zx, Zy, sigma_d, sigma_bx, sigma_by,
-      sigma_max, sigma_min, permissible_comp, isSafe, failReasons
-    };
-  }
-
-  global.App = global.App || {};
-  global.App.Analysis = { calculateColumn };
-})(window);
+  --shadow-pop: 0 6px 20px rgba(20,20,20,0.12);
+}
