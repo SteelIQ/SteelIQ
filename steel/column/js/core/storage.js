@@ -26,7 +26,7 @@
     set(key, value) {
       try {
         localStorage.setItem(NS + key, JSON.stringify(value));
-        return true;
+        return true; 
       } catch (err) {
         console.warn(`[Storage] failed to write "${key}"`, err);
         return false;
