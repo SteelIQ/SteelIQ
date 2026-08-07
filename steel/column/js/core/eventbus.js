@@ -6,7 +6,7 @@
  * directly — this is what keeps ui/*.js, models/*.js and core/state.js
  * decoupled so future modules (beams, footings, slabs...) can plug into
  * the same event names without touching existing code.
- */
+ */ 
 (function (global) {
   'use strict';
 
