@@ -1,420 +1,412 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
-
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StructBBS · Column Reinforcement &amp; BBS Designer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SteelIQ — Intelligent Structural Engineering Platform</title>
 
-  <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Fonts: fail gracefully to system-ui/monospace if offline, per css/variables.css -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2563eb",
+                        secondary: "#0f172a",
+                        accent: "#38bdf8"
+                    }
+                }
+            }
+        }
+    </script>
 
-  <link rel="stylesheet" href="css/variables.css" />
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/layout.css" />
-  <link rel="stylesheet" href="css/components.css" />
+    <style>
+        html{
+            scroll-behavior:smooth;
+        }
+
+        body{
+            background:#020617;
+        }
+
+        .glass{
+            backdrop-filter:blur(18px);
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+
+        .grid-bg{
+            background-image:
+            linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+            background-size:40px 40px;
+        }
+
+        .glow{
+            box-shadow:0 0 80px rgba(37,99,235,.35);
+        }
+    </style>
+
 </head>
 
-<body>
+<body class="text-white overflow-x-hidden">
 
-  <div id="app">
+<!-- Background -->
 
-    <!-- ============================== TOOLBAR ============================== -->
-    <header id="toolbar">
-      <div class="toolbar-brand">
-        <span class="mark">SB</span>
-        <span>StructBBS</span>
-      </div>
+<div class="fixed inset-0 -z-10 grid-bg"></div>
 
-      <div class="toolbar-group">
-        <button class="tbtn" id="btn-new-column" title="New column (Ctrl+N)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          New Column
-        </button>
-        <button class="tbtn tbtn-icon" id="btn-duplicate" title="Duplicate selected (Ctrl+D)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="8" y="8" width="12" height="12" rx="1" />
-            <path d="M4 16V5a1 1 0 0 1 1-1h11" />
-          </svg>
-        </button>
-        <button class="tbtn tbtn-icon" id="btn-delete" title="Delete selected">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M6 6l1 14a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-14" />
-          </svg>
-        </button>
-      </div>
+<div class="fixed w-[700px] h-[700px] rounded-full blur-[180px] bg-blue-700/30 top-[-200px] left-[-150px] -z-10"></div>
+<div class="fixed w-[600px] h-[600px] rounded-full blur-[160px] bg-cyan-500/20 bottom-[-250px] right-[-100px] -z-10"></div>
 
-      <div class="toolbar-group">
-        <button class="tbtn tbtn-icon" id="btn-undo" title="Undo (Ctrl+Z)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 14L4 9l5-5" />
-            <path d="M4 9h11a6 6 0 0 1 0 12h-1" />
-          </svg>
-        </button>
-        <button class="tbtn tbtn-icon" id="btn-redo" title="Redo (Ctrl+Y)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M15 14l5-5-5-5" />
-            <path d="M20 9H9a6 6 0 0 0 0 12h1" />
-          </svg>
-        </button>
-      </div>
+<!-- Navbar -->
 
-      <div class="toolbar-group">
-        <button class="tbtn" id="btn-import" title="Import project JSON">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
-            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-          </svg>
-          Import
-        </button>
-        <button class="tbtn" id="btn-export" title="Export project JSON">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 15V3m0 0l4 4m-4-4L8 7" />
-            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-          </svg>
-          Export
-        </button>
-      </div>
+<header class="sticky top-0 z-50 glass">
 
-      <div class="toolbar-spacer"></div>
+<div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-5">
 
-      <div class="toolbar-group">
-        <label style="margin:0; font-size:10px;" for="select-design-code">CODE</label>
-        <select class="select-inline" id="select-design-code"></select>
-      </div>
+<div class="flex items-center gap-3">
 
-      <div class="toolbar-group">
-        <button class="tbtn tbtn-icon" id="btn-roadmap" title="Roadmap / About">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="9" />
-            <path d="M12 8v.01M12 11v5" />
-          </svg>
-        </button>
-        <button class="tbtn tbtn-icon" id="btn-theme" title="Toggle dark / light">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z" />
-          </svg>
-        </button>
-      </div>
-    </header>
+<div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center font-bold text-xl shadow-xl">
+S
+</div>
 
-    <!-- ============================== BODY ============================== -->
-    <div id="body">
+<div>
 
-      <!-- Module nav rail -->
-      <nav id="nav-rail">
-        <button class="rail-btn" title="Project Overview">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-3v-6H8v6H5a1 1 0 0 1-1-1z" />
-          </svg>
-        </button>
-        <button class="rail-btn active" title="Column Designer">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="9" y="3" width="6" height="18" />
-            <path d="M6 21h12M6 3h12" />
-          </svg>
-        </button>
-        <div class="rail-divider"></div>
-        <button class="rail-btn" data-locked title="Beam Reinforcement — planned module">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="9" width="18" height="6" />
-          </svg>
-        </button>
-        <button class="rail-btn" data-locked title="Slab Reinforcement — planned module">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" />
-            <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
-          </svg>
-        </button>
-        <button class="rail-btn" data-locked title="Footing Reinforcement — planned module">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 20h16M6 20V10l6-5 6 5v10" />
-          </svg>
-        </button>
-        <button class="rail-btn" data-locked title="Shear Wall — planned module">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="6" y="2" width="12" height="20" />
-            <path d="M6 8h12M6 14h12" />
-          </svg>
-        </button>
-        <button class="rail-btn" data-locked title="Stair Reinforcement — planned module">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 18h16M4 18V8h6V4h8v14" />
-          </svg>
-        </button>
-        <button class="rail-btn" data-locked title="Pile Reinforcement — planned module">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="4" r="2" />
-            <path d="M12 6v14M7 10c1 2 3 3 5 3s4-1 5-3" />
-          </svg>
-        </button>
-        <button class="rail-btn" data-locked title="Retaining Wall Reinforcement — planned module">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 18L10 6l4 4 6 8" />
-            <path d="M4 18h16" />
-          </svg>
-        </button>
-        <button class="rail-btn" data-locked title="More structural elements — planned module">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5v14" />
-          </svg>
-        </button>
-      </nav>
+<h1 class="font-bold text-2xl">
+SteelIQ
+</h1>
 
-      <!-- Left panel: column schedule -->
-      <aside id="panel-left">
-        <div class="panel-header"><span class="panel-title">Project Elements</span></div>
-        <div class="search-row">
-          <input type="text" id="column-search" placeholder="Search elements or columns…" />
-          <button class="btn-add" id="btn-add-column" title="Add column"><svg viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5">
-              <path d="M12 5v14M5 12h14" />
-            </svg></button>
-        </div>
-        <div class="panel-body">
-          <ul id="column-list"></ul>
-          <div class="panel-empty" id="column-list-empty" style="display:none;">No elements match your search.</div>
-        </div>
-      </aside>
+<p class="text-xs text-slate-400">
+Structural Engineering Platform
+</p>
 
-      <div class="resizer" id="resizer-left"></div>
+</div>
 
-      <!-- Center: workspace -->
-      <main id="workspace">
+</div>
 
-        <!-- Workspace Tabs -->
-        <div id="workspace-tabs" style="position: relative; display: flex; align-items: center;">
+<nav class="hidden md:flex gap-8 text-slate-300">
 
-          <!-- Settings Icon Button -->
-          <div id="view-settings-toggle" class="ws-tab"
-            style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center;"
-            title="View Layout Settings">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-              <circle cx="12" cy="12" r="3" />
-              <path
-                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c0 .69.41 1.31 1.51 1.51h.09a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-          </div>
+<a href="#features" class="hover:text-white">Features</a>
+<a href="#modules" class="hover:text-white">Modules</a>
+<a href="#vision" class="hover:text-white">Vision</a>
 
-          <!-- Floating Popover Checkbox Menu -->
-          <div id="view-settings-popover"
-            style="display: none; position: absolute; top: 42px; left: 0; background: var(--bg-panel); border: 1px solid var(--border-strong); border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.6); padding: 12px; z-index: 100; min-width: 190px; font-family: var(--font-mono); font-size: 12px;">
-            <div
-              style="font-weight: bold; margin-bottom: 8px; color: var(--text-primary); border-bottom: 1px solid var(--border-strong); padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
-              Cross-Section Views</div>
-            <label
-              style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; color: var(--text-secondary);">
-              <input type="checkbox" id="chk-plan-view" checked style="accent-color: var(--accent); cursor: pointer;">
-              Plan View (Top)
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-secondary);">
-              <input type="checkbox" id="chk-elevation-view" checked
-                style="accent-color: var(--accent); cursor: pointer;"> Elevation View (Side)
-            </label>
-          </div>
+</nav>
 
-          <!-- Tabs -->
-          <div class="ws-tab active" data-tab="cross-section">Cross-Section</div>
-          <div class="ws-tab" data-tab="diagrams">Load Diagrams</div>
-          <div class="ws-tab" data-tab="3d">3D Reinforcement</div>
-          <div class="ws-tab" data-tab="calculations">Calculations</div>
-          <div class="ws-tab" data-tab="bbs">BBS Schedule</div>
-          <div class="ws-tab" data-tab="report" data-locked="Phase 8">PDF Report</div>
+<a href="#"
+class="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 transition">
+GitHub
+</a>
 
-        </div> <!-- ✅ PROPERLY CLOSED #workspace-tabs HERE -->
+</div>
 
-        <!-- The main viewing area -->
-        <div id="workspace-content"
-          style="position:relative; flex:1; overflow:hidden; display:flex; flex-direction:column;">
+</header>
 
-          <!-- View 1: Cross-Section & Elevation Dual View -->
-          <div id="view-cross-section" class="ws-view active"
-            style="width:100%; height:100%; display:flex; flex-direction:row; gap:12px; padding:12px; box-sizing:border-box;">
+<!-- Hero -->
 
-            <!-- Left Panel: Top Plan View -->
-            <div id="canvas-stage"
-              style="flex:1; position:relative; height:100%; background:var(--bg-canvas); border:1px solid var(--border-strong); border-radius:6px; overflow:hidden;">
-              <div id="canvas-viewport" style="position:absolute; inset:0; width:100%; height:100%;"></div>
-              <div id="canvas-grid-overlay" aria-hidden="true" style="position:absolute; inset:0; pointer-events:none;">
-              </div>
-              <div class="canvas-empty" id="canvas-empty"
-                style="display:none; position:absolute; inset:0; z-index:10; align-items:center; justify-content:center; flex-direction:column;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
-                  <rect x="9" y="3" width="6" height="18" />
-                </svg>
-                <div>Select or create a column to preview.</div>
-              </div>
-              <div class="canvas-hud">
-                <button class="hud-btn" id="hud-zoom-out" title="Zoom out">−</button>
-                <button class="hud-btn" id="hud-zoom-reset" title="Reset view"><svg viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2">
-                    <rect x="4" y="4" width="16" height="16" rx="2" />
-                  </svg></button>
-                <button class="hud-btn" id="hud-zoom-in" title="Zoom in">+</button>
-                <span class="hud-sep"></span>
-                <button class="hud-btn" id="hud-export-svg" title="Export SVG">SVG</button>
-                <button class="hud-btn" id="hud-export-png" title="Export PNG">PNG</button>
-              </div>
-              <div class="canvas-tooltip" id="bar-tooltip" style="display:none;"></div>
-              <div class="mark-legend-dock" id="mark-legend"></div>
-            </div>
+<section class="max-w-7xl mx-auto px-6 py-28">
 
-            <!-- Right Panel: Side Elevation View Cage Container -->
-            <div id="elevation-panel-container"
-              style="flex:1; position:relative; height:100%; background:var(--bg-canvas); border:1px solid var(--border-strong); border-radius:6px; overflow:hidden; display:flex; flex-direction:column;">
-              <div
-                style="position: absolute; top: 12px; left: 16px; z-index: 10; font-family: var(--font-mono); font-size: 11px; font-weight: bold; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
-                Elevation View (Side)</div>
-              <div id="elevation-stage" style="position:absolute; inset:0; width:100%; height:100%;"></div>
-            </div>
+<div class="grid lg:grid-cols-2 gap-16 items-center">
 
-          </div>
+<div>
 
-          <!-- View 2: Load Diagrams -->
-          <div id="view-diagrams" class="ws-view" style="display:none; width:100%; height:100%; flex-direction:column;">
-            <div id="diagrams-stage"
-              style="flex:1; position:relative; width:100%; background:var(--bg-canvas); overflow:hidden;">
-              <div id="diagrams-viewport" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
-              <div class="canvas-empty" id="diagrams-empty"
-                style="display:none; position:absolute; inset:0; z-index:10;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <rect x="9" y="3" width="6" height="18" />
-                </svg>
-                <div>Select or create a column to view diagrams.</div>
-              </div>
-              <div class="canvas-hud" style="z-index:20;">
-                <button class="hud-btn" id="diag-zoom-out" title="Zoom out">−</button>
-                <button class="hud-btn" id="diag-zoom-reset" title="Reset view"><svg viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2">
-                    <rect x="4" y="4" width="16" height="16" rx="2" />
-                  </svg></button>
-                <button class="hud-btn" id="diag-zoom-in" title="Zoom in">+</button>
-                <span class="hud-sep"></span>
-                <button class="hud-btn" id="diag-export-svg" title="Export SVG">SVG</button>
-                <button class="hud-btn" id="diag-export-png" title="Export PNG">PNG</button>
-              </div>
-              <div class="mark-legend-dock" id="diag-data-table" style="z-index:20; bottom: 20px; right: 20px;"></div>
-            </div>
-          </div>
+<div class="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-5 py-2 mb-8">
 
-          <div id="view-3d" class="ws-view">
-            <div id="three-stage" class="three-stage"></div>
-          </div>
-          
-          <!-- View 3: Calculations Report -->
-          <div id="view-calculations" class="ws-view"
-            style="display:none; width:100%; height:100%; overflow-y:auto; padding:40px; background:var(--bg-panel);">
-            <div style="max-width:800px; margin:0 auto;" id="calc-steps-container">
-              <!-- Math steps injected here -->
-            </div>
-          </div>
+<span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
 
-          <!-- View 4: BBS Workspace -->
-          <div id="view-bbs" class="ws-view" style="display:none; width:100%; height:100%;">
+<span class="text-sm text-blue-200">
+Next Generation Structural Engineering Software
+</span>
 
-            <div id="bbs-workspace" style="width:100%; height:100%;">
-            </div>
+</div>
 
-          </div>
+<h1 class="text-5xl md:text-7xl font-black leading-tight">
 
-        </div> <!-- ✅ PROPERLY CLOSED #workspace-content HERE -->
+Design
 
-      </main> <!-- ✅ PROPERLY CLOSED #workspace HERE -->
+<span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 bg-clip-text text-transparent">
 
-      <div class="resizer" id="resizer-right"></div>
+Smarter
 
-      <!-- Right panel: properties -->
-      <aside id="panel-right">
-        <div class="panel-header"><span class="panel-title">Properties</span></div>
-        <div class="panel-body" id="properties-body"></div>
-      </aside>
+</span>
 
-    </div>
+Structures.
 
-    <!-- ============================== STATUS BAR ============================== -->
-    <footer id="statusbar">
-      <span id="status-count">0 column types</span>
-      <div class="sep"></div>
-      <span id="status-qty">0 total in building</span>
-      <div class="sep"></div>
-      <span id="status-selection">No selection</span>
-      <div class="spacer"></div>
-      <span><span class="save-dot" id="save-dot"></span><span id="save-label">Saved</span></span>
-      <div class="sep"></div>
-      <span>Phase 4 of 9 · offline</span>
-    </footer>
+</h1>
 
-  </div>
+<p class="mt-8 text-xl text-slate-300 leading-relaxed max-w-xl">
 
-  <!-- Roadmap / About modal -->
-  <div class="modal-backdrop" id="roadmap-modal" style="display:none;">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Build Roadmap</h3>
-        <button class="modal-close" id="roadmap-close">✕</button>
-      </div>
-      <div class="modal-body" id="roadmap-list"></div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" id="roadmap-ok"
-          onclick="document.getElementById('roadmap-modal').style.display='none'">Got it</button>
-      </div>
-    </div>
-  </div>
+SteelIQ helps structural engineers design reinforced concrete members,
+generate steel detailing, visualize reinforcement layouts,
+calculate quantities,
+and produce professional engineering documentation from one intelligent workspace.
 
-  <div id="toast-stack"></div>
+</p>
 
-  <!-- Core -->
-  <script src="js/core/eventbus.js"></script>
-  <script src="js/core/storage.js"></script>
-  <script src="js/core/analysis.js"></script> <!-- NEW -->
+<div class="flex flex-wrap gap-5 mt-12">
 
-  <!-- Models -->
-  <script src="js/models/columnTypes.js"></script>
-  <script src="js/models/column.js"></script>
-  <script src="js/models/geometry.js"></script>
-  <script src="js/models/reinforcement.js"></script>
-  <script src="js/models/bbs.js"></script>
-  <script src="js/models/column.js"></script>
+<a href="#"
+class="px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 transition font-semibold glow">
 
-  <!-- Core state (depends on models) -->
-  <script src="js/core/state.js"></script>
+Get Started
 
-  <!-- UI -->
-  <script src="js/ui/tabs.js"></script> <!-- NEW -->
-  <script src="js/ui/calculations.js"></script> <!-- NEW -->
-  <script src="js/ui/toast.js"></script>
-  <script src="js/ui/theme.js"></script>
-  <script src="js/ui/panels.js"></script>
-  <script src="js/ui/columnList.js"></script>
-  <script src="js/ui/propertiesPanel.js"></script>
-  <script src="js/ui/cadGrid.js"></script>
-  <script src="js/ui/canvas.js"></script>
-  <script src="js/ui/toolbar.js"></script>
-  <script src="js/ui/statusbar.js"></script>
-  <script src="js/ui/analysisViz.js"></script>
-  <script src="js/ui/elevationCanvas.js"></script>
+</a>
 
-  <script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.179.1/examples/jsm/"
-  }
-}
+<a href="#features"
+class="px-8 py-4 rounded-xl border border-slate-600 hover:border-blue-500 transition">
+
+Explore Features
+
+</a>
+
+</div>
+
+<div class="grid grid-cols-3 gap-8 mt-16">
+
+<div>
+
+<h2 class="text-4xl font-bold text-blue-400">
+20+
+</h2>
+
+<p class="text-slate-400">
+Future Modules
+</p>
+
+</div>
+
+<div>
+
+<h2 class="text-4xl font-bold text-cyan-400">
+100%
+</h2>
+
+<p class="text-slate-400">
+Browser Based
+</p>
+
+</div>
+
+<div>
+
+<h2 class="text-4xl font-bold text-blue-300">
+∞
+</h2>
+
+<p class="text-slate-400">
+Scalable
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Dashboard Preview -->
+
+<div class="relative">
+
+<div class="absolute inset-0 bg-blue-500 blur-[130px] opacity-20 rounded-full"></div>
+
+<div class="glass rounded-3xl p-8 border border-blue-500/20 relative">
+
+<div class="flex justify-between items-center mb-8">
+
+<h3 class="font-bold text-xl">
+SteelIQ Dashboard
+</h3>
+
+<div class="flex gap-2">
+
+<div class="w-3 h-3 rounded-full bg-red-400"></div>
+<div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+<div class="w-3 h-3 rounded-full bg-green-400"></div>
+
+</div>
+
+</div>
+
+<div class="grid grid-cols-2 gap-6">
+
+<div class="glass rounded-2xl p-6">
+
+<p class="text-slate-400">Column</p>
+<h3 class="text-3xl font-bold mt-2">C-12</h3>
+
+<div class="mt-6 h-40 rounded-xl bg-gradient-to-b from-blue-500/20 to-transparent border border-blue-500/20 flex items-center justify-center">
+
+<div class="w-24 h-32 border-4 border-cyan-400 relative">
+
+<div class="absolute w-3 h-3 rounded-full bg-cyan-300 top-2 left-2"></div>
+<div class="absolute w-3 h-3 rounded-full bg-cyan-300 top-2 right-2"></div>
+<div class="absolute w-3 h-3 rounded-full bg-cyan-300 bottom-2 left-2"></div>
+<div class="absolute w-3 h-3 rounded-full bg-cyan-300 bottom-2 right-2"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="space-y-5">
+
+<div class="glass rounded-xl p-5">
+Steel Weight
+<div class="text-3xl font-bold mt-2">612 kg</div>
+</div>
+
+<div class="glass rounded-xl p-5">
+Concrete
+<div class="text-3xl font-bold mt-2">4.25 m³</div>
+</div>
+
+<div class="glass rounded-xl p-5">
+Bars
+<div class="text-3xl font-bold mt-2">16 Ø20</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- Features -->
+
+<section id="features" class="max-w-7xl mx-auto px-6 py-24">
+
+<div class="text-center">
+
+<h2 class="text-5xl font-black">
+
+Everything You Need
+
+</h2>
+
+<p class="text-slate-400 mt-5 max-w-3xl mx-auto">
+
+Designed specifically for structural engineers and reinforced concrete detailing.
+
+</p>
+
+</div>
+
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-20">
+
+<script>
+const features=[
+["🧮","Steel Calculations"],
+["📐","Column Detailing"],
+["📄","PDF Reports"],
+["📊","Dashboard"],
+["📦","BOQ & Quantities"],
+["📏","Development Length"],
+["🧱","Bar Bending Schedule"],
+["📈","Material Analytics"],
+["🎯","Visualization"]
+];
+
+document.write(features.map(f=>`
+<div class="glass rounded-3xl p-8 hover:-translate-y-2 transition duration-300">
+<div class="text-5xl">${f[0]}</div>
+<h3 class="text-2xl font-bold mt-6">${f[1]}</h3>
+<p class="text-slate-400 mt-3">
+Professional engineering tools with modern visualization and automation.
+</p>
+</div>
+`).join(""));
 </script>
 
-  <script type="module" src="js/ui/threeRenderer.js"></script>
-  <script src="js/ui/bbsWorkspace.js"></script>
-  <script src="js/core/workspaceManager.js"></script>
-  <!-- Boot -->
-  <script src="js/main.js"></script>
-</body>
+</div>
 
+</section>
+
+<!-- Modules -->
+
+<section id="modules" class="py-24">
+
+<div class="max-w-6xl mx-auto px-6">
+
+<div class="glass rounded-3xl p-12">
+
+<h2 class="text-4xl font-black text-center">
+
+Upcoming Engineering Modules
+
+</h2>
+
+<div class="grid md:grid-cols-4 gap-6 mt-12">
+
+<div>✔ Columns</div>
+<div>✔ Beams</div>
+<div>✔ Slabs</div>
+<div>✔ Footings</div>
+<div>✔ Staircase</div>
+<div>✔ Shear Walls</div>
+<div>✔ Foundations</div>
+<div>✔ AI Assistant</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- CTA -->
+
+<section id="vision" class="py-28">
+
+<div class="max-w-5xl mx-auto px-6 text-center">
+
+<h2 class="text-6xl font-black">
+
+Engineering the Future.
+
+</h2>
+
+<p class="mt-8 text-xl text-slate-400 leading-relaxed">
+
+SteelIQ is building a complete structural engineering ecosystem—
+from intelligent calculations and reinforcement detailing
+to visualization, documentation, and project management.
+
+</p>
+
+<a href="#"
+class="inline-block mt-12 px-10 py-5 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 font-semibold text-lg hover:scale-105 transition">
+
+Start Building →
+
+</a>
+
+</div>
+
+</section>
+
+<footer class="border-t border-slate-800">
+
+<div class="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-5">
+
+<p class="text-slate-500">
+© 2026 SteelIQ. Intelligent Structural Engineering.
+</p>
+
+<div class="text-slate-500">
+Built with HTML • Tailwind CSS
+</div>
+
+</div>
+
+</footer>
+
+</body>
 </html>
