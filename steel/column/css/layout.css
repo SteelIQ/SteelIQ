@@ -84,8 +84,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 8px;
+  padding: 8px 4px;
   gap: 2px;
+  overflow-y: auto;
 }
 .rail-btn {
   width: 36px; height: 36px;
@@ -171,17 +172,22 @@
   flex: 1;
   position: relative;
   overflow: hidden;
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background: var(--bg-canvas);
 }
 #canvas-viewport {
   position: absolute;
   transform-origin: 0 0;
   cursor: grab;
+  z-index: 2;
 }
 #canvas-viewport.panning { cursor: grabbing; }
+#canvas-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  transform-origin: 0 0;
+}
 
 .canvas-hud {
   position: absolute;
@@ -199,6 +205,35 @@
 }
 .hud-btn:hover { color: var(--text-primary); border-color: var(--border-strong); }
 .hud-btn svg { width: 14px; height: 14px; }
+.hud-btn { font-family: var(--font-mono); font-size: 10px; font-weight: 700; width: auto; padding: 0 8px; }
+.hud-sep { width: 1px; height: 16px; background: var(--border); margin: 0 2px; align-self: center; }
+
+.canvas-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 9px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-pop);
+  z-index: 6;
+  max-width: 200px;
+}
+.canvas-tooltip strong { color: var(--text-primary); }
+
+.mark-legend-dock {
+  position: absolute;
+  top: 10px; right: 10px;
+  z-index: 4;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  max-width: 230px;
+  overflow: hidden;
+}
 
 .canvas-empty {
   position: absolute; inset: 0;
