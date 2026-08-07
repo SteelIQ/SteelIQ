@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StructBBS · Column Reinforcement &amp; BBS Designer</title>
+
+<!-- Fonts: fail gracefully to system-ui/monospace if offline, per css/variables.css -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/variables.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/layout.css" />
+<link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============================== TOOLBAR ============================== -->
+  <header id="toolbar">
+    <div class="toolbar-brand">
+      <span class="mark">SB</span>
+      <span>StructBBS</span>
+    </div>
+
+    <div class="toolbar-group">
+      <button class="tbtn" id="btn-new-column" title="New column (Ctrl+N)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        New Column
+      </button>
+      <button class="tbtn tbtn-icon" id="btn-duplicate" title="Duplicate selected (Ctrl+D)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="1"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/></svg>
+      </button>
+      <button class="tbtn tbtn-icon" id="btn-delete" title="Delete selected">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M6 6l1 14a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-14"/></svg>
+      </button>
+    </div>
+
+    <div class="toolbar-group">
+      <button class="tbtn tbtn-icon" id="btn-undo" title="Undo (Ctrl+Z)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a6 6 0 0 1 0 12h-1"/></svg>
+      </button>
+      <button class="tbtn tbtn-icon" id="btn-redo" title="Redo (Ctrl+Y)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a6 6 0 0 0 0 12h1"/></svg>
+      </button>
+    </div>
+
+    <div class="toolbar-group">
+      <button class="tbtn" id="btn-import" title="Import project JSON">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        Import
+      </button>
+      <button class="tbtn" id="btn-export" title="Export project JSON">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 0l4 4m-4-4L8 7"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        Export
+      </button>
+    </div>
+
+    <div class="toolbar-spacer"></div>
+
+    <div class="toolbar-group">
+      <label style="margin:0; font-size:10px;" for="select-design-code">CODE</label>
+      <select class="select-inline" id="select-design-code"></select>
+    </div>
+
+    <div class="toolbar-group">
+      <button class="tbtn tbtn-icon" id="btn-roadmap" title="Roadmap / About">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v.01M12 11v5"/></svg>
+      </button>
+      <button class="tbtn tbtn-icon" id="btn-theme" title="Toggle dark / light">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================== BODY ============================== -->
+  <div id="body">
+
+    <!-- Module nav rail -->
+    <nav id="nav-rail">
+      <button class="rail-btn active" title="Column Designer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="18"/><path d="M6 21h12M6 3h12"/></svg>
+      </button>
+      <div class="rail-divider"></div>
+      <button class="rail-btn" data-locked title="Beam Reinforcement — planned module">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="6"/></svg>
+      </button>
+      <button class="rail-btn" data-locked title="Footing Reinforcement — planned module">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M6 20V10l6-5 6 5v10"/></svg>
+      </button>
+      <button class="rail-btn" data-locked title="Slab Reinforcement — planned module">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+      </button>
+      <button class="rail-btn" data-locked title="Shear Wall — planned module">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20"/><path d="M6 8h12M6 14h12"/></svg>
+      </button>
+    </nav>
+
+    <!-- Left panel: column schedule -->
+    <aside id="panel-left">
+      <div class="panel-header"><span class="panel-title">Column Schedule</span></div>
+      <div class="search-row">
+        <input type="text" id="column-search" placeholder="Search C1, square, GF…" />
+        <button class="btn-add" id="btn-add-column" title="Add column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+      <div class="panel-body">
+        <ul id="column-list"></ul>
+        <div class="panel-empty" id="column-list-empty" style="display:none;">No columns match your search.</div>
+      </div>
+    </aside>
+
+    <div class="resizer" id="resizer-left"></div>
+
+    <!-- Center: workspace -->
+    <main id="workspace">
+      <div id="workspace-tabs">
+        <div class="ws-tab active" data-tab="cross-section">Cross-Section</div>
+        <div class="ws-tab" data-tab="calculations">Calculations</div>
+        <div class="ws-tab" data-tab="bbs">BBS Schedule</div>
+        <div class="ws-tab" data-tab="report">PDF Report</div>
+      </div>
+      <div id="canvas-stage">
+        <!-- Adaptive CAD grid (js/ui/cadViewport.js + js/ui/cadGrid.js) —
+             mounted here, ahead of #canvas-viewport in DOM order, so it
+             paints behind the drawing rather than on top of it. -->
+        <div id="canvas-grid-overlay" aria-hidden="true"></div>
+        <div id="canvas-viewport">
+          <!-- SVG cross-section injected here by js/ui/canvas.js -->
+        </div>
+        <div class="canvas-empty" id="canvas-empty" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="3" width="6" height="18"/></svg>
+          <div>Select or create a column to preview its cross-section.</div>
+        </div>
+
+        <div class="placement-tools-dock">
+          <div class="pt-title">Placement Tools</div>
+          <div class="pt-row">
+            <button class="pt-btn" id="pt-mirror-h" title="Mirror left / right">⇋ Mirror ↔</button>
+            <button class="pt-btn" id="pt-mirror-v" title="Mirror top / bottom">⇅ Mirror ↕</button>
+          </div>
+          <div class="pt-row">
+            <button class="pt-btn" id="pt-rotate-ccw" title="Rotate 90° counter-clockwise">↺ 90°</button>
+            <button class="pt-btn" id="pt-rotate-cw" title="Rotate 90° clockwise">↻ 90°</button>
+          </div>
+          <div class="pt-row">
+            <button class="pt-btn pt-btn-full" id="pt-reset" title="Clear all hand-placed positions">Reset to Auto Layout</button>
+          </div>
+          <div class="pt-divider"></div>
+          <label class="pt-check"><input type="checkbox" id="pt-snap-perimeter" checked /> Snap to rebar ring</label>
+          <label class="pt-check"><input type="checkbox" id="pt-grid-snap" /> Snap to 5mm grid</label>
+          <label class="pt-check"><input type="checkbox" id="pt-symmetric-drag" /> Symmetric drag (mirror pair)</label>
+          <div class="pt-hint">Drag any bar on the drawing to move it.</div>
+        </div>
+
+        <div class="canvas-hud">
+          <button class="hud-btn" id="hud-zoom-out" title="Zoom out">−</button>
+          <button class="hud-btn" id="hud-zoom-reset" title="Reset view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+          </button>
+          <button class="hud-btn" id="hud-zoom-in" title="Zoom in">+</button>
+          <span class="hud-sep"></span>
+          <button class="hud-btn" id="hud-export-svg" title="Export drawing as SVG">SVG</button>
+          <button class="hud-btn" id="hud-export-png" title="Export drawing as PNG">PNG</button>
+        </div>
+        <div class="canvas-tooltip" id="bar-tooltip" style="display:none;"></div>
+        <div class="mark-legend-dock" id="mark-legend"></div>
+      </div>
+
+      <div id="calc-stage" style="display:none;">
+        <div id="calc-body"></div>
+      </div>
+
+      <div id="bbs-stage" style="display:none;">
+        <div id="bbs-body"></div>
+      </div>
+
+      <div id="report-stage" style="display:none;">
+        <div id="report-body"></div>
+      </div>
+    </main>
+
+    <div class="resizer" id="resizer-right"></div>
+
+    <!-- Right panel: properties -->
+    <aside id="panel-right">
+      <div class="panel-header"><span class="panel-title">Properties</span></div>
+      <div class="panel-body" id="properties-body"></div>
+    </aside>
+
+  </div>
+
+  <!-- ============================== STATUS BAR ============================== -->
+  <footer id="statusbar">
+    <span id="status-count">0 column types</span>
+    <div class="sep"></div>
+    <span id="status-qty">0 total in building</span>
+    <div class="sep"></div>
+    <span id="status-selection">No selection</span>
+    <div class="spacer"></div>
+    <span><span class="save-dot" id="save-dot"></span><span id="save-label">Saved</span></span>
+    <div class="sep"></div>
+    <span>Phase 8 of 9 · offline</span>
+  </footer>
+
+</div>
+
+<!-- Roadmap / About modal -->
+<div class="modal-backdrop" id="roadmap-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Build Roadmap</h3>
+      <button class="modal-close" id="roadmap-close">✕</button>
+    </div>
+    <div class="modal-body" id="roadmap-list"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="roadmap-ok" onclick="document.getElementById('roadmap-modal').style.display='none'">Got it</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-stack"></div>
+
+<!-- Export libraries (Phase 8) — loaded from CDN per the brief's own
+     allowance; this is the one feature in the app that needs a network
+     connection (once, to load these) — everything else works offline. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- Core -->
+<script src="js/core/eventbus.js"></script>
+<script src="js/core/storage.js"></script>
+<!-- Models -->
+<script src="js/models/columnTypes.js"></script>
+<script src="js/models/column.js"></script>
+<script src="js/models/geometry.js"></script>
+<script src="js/models/devlap.js"></script>
+<script src="js/models/calc.js"></script>
+<script src="js/models/reportData.js"></script>
+<!-- Core state (depends on models) -->
+<script src="js/core/state.js"></script>
+<!-- UI -->
+<script src="js/ui/toast.js"></script>
+<script src="js/ui/theme.js"></script>
+<script src="js/ui/panels.js"></script>
+<script src="js/ui/columnList.js"></script>
+<script src="js/ui/propertiesPanel.js"></script>
+<script src="js/ui/cadViewport.js"></script>
+<script src="js/ui/cadGrid.js"></script>
+<script src="js/ui/canvas.js"></script>
+<script src="js/ui/calcPanel.js"></script>
+<script src="js/ui/bbsPanel.js"></script>
+<script src="js/ui/reportPanel.js"></script>
+<script src="js/ui/toolbar.js"></script>
+<script src="js/ui/statusbar.js"></script>
+<!-- Boot -->
+<script src="js/main.js"></script>
+</body>
+</html>
