@@ -1,0 +1,215 @@
+/* ==========================================================================
+   Components
+   ========================================================================== */
+
+/* --- Search / filter bar --- */
+.search-row {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; gap: 6px;
+  flex-shrink: 0;
+}
+.search-row input { flex: 1; }
+.search-row .btn-add {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  color: var(--text-on-accent);
+  border-radius: var(--radius-sm);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.search-row .btn-add:hover { background: var(--accent-hover); }
+.search-row .btn-add svg { width: 15px; height: 15px; }
+
+/* --- Column list --- */
+#column-list { list-style: none; margin: 0; padding: 4px; }
+.column-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1px;
+  border: 1px solid transparent;
+}
+.column-item:hover { background: var(--bg-panel-alt); }
+.column-item.selected { background: var(--accent-dim); border-color: var(--accent); }
+.column-item .swatch {
+  width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
+}
+.column-item .ci-main { flex: 1; min-width: 0; }
+.column-item .ci-name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: auto;
+}
+.column-item .ci-name[readonly] { pointer-events: none; }
+.column-item .ci-meta { font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
+.column-item .ci-qty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.column-item .ci-actions {
+  display: flex; gap: 2px; opacity: 0; flex-shrink: 0;
+}
+.column-item:hover .ci-actions, .column-item.selected .ci-actions { opacity: 1; }
+.ci-action-btn {
+  width: 20px; height: 20px;
+  display: grid; place-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+.ci-action-btn:hover { background: var(--bg-panel); color: var(--text-primary); }
+.ci-action-btn.danger:hover { color: var(--danger); }
+.ci-action-btn svg { width: 12px; height: 12px; }
+
+/* --- Form grid (properties panel) --- */
+.field { margin-bottom: 10px; }
+.field-row { display: flex; gap: 8px; }
+.field-row .field { flex: 1; }
+.field-suffix-wrap { position: relative; }
+.field-suffix-wrap input { padding-right: 30px; }
+.field-suffix {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  font-size: 10.5px; color: var(--text-muted); font-family: var(--font-mono);
+  pointer-events: none;
+}
+.field-hint { font-size: 10.5px; color: var(--text-muted); margin-top: 3px; }
+
+.section-collapse {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; margin-bottom: 8px;
+}
+.section-collapse h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+.section-collapse svg { width: 12px; height: 12px; color: var(--text-muted); transition: transform 0.15s ease; }
+.section-collapse.collapsed svg { transform: rotate(-90deg); }
+.section-content.collapsed { display: none; }
+
+/* --- Buttons --- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--bg-panel-alt);
+  color: var(--text-primary);
+}
+.btn:hover:not(:disabled) { border-color: var(--border-strong); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--text-on-accent); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn-danger-outline { color: var(--danger); border-color: var(--danger-dim); }
+.btn-danger-outline:hover { background: var(--danger-dim); }
+.btn-block { width: 100%; }
+.btn svg { width: 13px; height: 13px; }
+
+/* --- Badges / status --- */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+  padding: 2px 6px; border-radius: 3px;
+}
+.badge-ok { background: var(--success-dim); color: var(--success); }
+.badge-warn { background: var(--warning-dim); color: var(--warning); }
+.badge-danger { background: var(--danger-dim); color: var(--danger); }
+.badge-neutral { background: var(--bg-panel-alt); color: var(--text-muted); border: 1px solid var(--border); }
+
+/* --- Empty / placeholder notices (used honestly for not-yet-built phases) --- */
+.notice {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.notice svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; color: var(--annotate); }
+
+/* --- Modal --- */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.modal {
+  width: 480px; max-width: 90vw; max-height: 80vh;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-pop);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.modal-header {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h3 { font-size: 13px; }
+.modal-close { width: 22px; height: 22px; display: grid; place-items: center; border-radius: var(--radius-sm); color: var(--text-muted); }
+.modal-close:hover { background: var(--bg-panel-alt); color: var(--text-primary); }
+.modal-body { padding: 16px; overflow-y: auto; }
+.modal-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* --- Roadmap list (in "About / Roadmap" modal) --- */
+.roadmap-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.roadmap-item:last-child { border-bottom: none; }
+.roadmap-check {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: grid; place-items: center; flex-shrink: 0; margin-top: 1px;
+  border: 1px solid var(--border-strong);
+}
+.roadmap-item.done .roadmap-check { background: var(--success-dim); border-color: var(--success); color: var(--success); }
+.roadmap-item.current .roadmap-check { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+.roadmap-check svg { width: 10px; height: 10px; }
+.roadmap-text strong { font-size: 12px; display: block; }
+.roadmap-text span { font-size: 11px; color: var(--text-muted); }
+
+/* --- Bar-mark legend table (canvas overlay) --- */
+.mark-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.mark-table th {
+  text-align: left; padding: 6px 8px;
+  background: var(--bg-panel-alt);
+  color: var(--text-muted);
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+}
+.mark-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.mark-table tr:last-child td { border-bottom: none; }
+.mark-table .swatch { width: 7px; height: 7px; border-radius: 2px; margin-right: 4px; }
+
+/* --- Toast --- */
+#toast-stack {
+  position: fixed; bottom: 36px; right: 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  z-index: 200;
+}
+.toast {
+  background: var(--bg-panel); border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px; font-size: 12px;
+  box-shadow: var(--shadow-pop);
+  animation: toast-in 0.15s ease-out;
+}
+.toast.danger { border-left-color: var(--danger); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
