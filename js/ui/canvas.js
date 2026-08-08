@@ -1,24 +1,13 @@
 /**
- * Canvas — Phase 4 (drawing engine) + Phase 5 (placement editor)
+ * Canvas — CAD Detailing Engine & Interactive Placement Editor
  * -----------------------------------------------------------------------
- * Phase 4 gave every bar a correct *automatic* position. Phase 5 lets the
- * engineer grab any bar and drag it, with:
- *   - snap-to-perimeter (default on): the bar is constrained to its own
- *     group's rebar ring (cover + tie + bar radius from the face) —
- *     physically what a real cage allows — via Geometry.snapToRing.
- *   - grid snap (optional): rounds the committed position to 5mm.
- *   - symmetric drag (optional): moving one bar also moves its
- *     index-mirrored partner in the same group (i ↔ count-1-i) reflected
- *     across the vertical centerline, so symmetric layouts stay symmetric.
- *   - whole-layout Mirror / Rotate / Reset-to-auto, which bake the
- *     column's *current* effective positions (auto or already-hand-
- *     placed) through a transform and store the result as manual
- *     overrides on every group.
- *
- * A drag never touches App.state until pointerup — intermediate frames
- * are drawn by directly moving the affected <circle> elements, and the
- * single committed position is what goes through state.updateColumn
- * (one undo step per drag, not one per pixel).
+ * Real-scale SVG visualization engine featuring:
+ *   - Architectural material hatching for concrete cross-sections
+ *   - Filleted stirrup bends with true bend radii
+ *   - Overlapping 135°/90° seismic stirrup hooks wrapping corner rebar
+ *   - Architectural dimension lines with 45° slash ticks
+ *   - Drag-and-drop rebar placement, perimeter snapping, mirror, and rotate
+ *   - SVG/PNG drawing export pipeline
  */
 (function (global) {
   'use strict';
@@ -38,7 +27,7 @@
 
   const toolState = { snapPerimeter: true, gridSnap: false, symmetricDrag: false };
 
-  // 1mm = 0.42px before user zoom — big enough that 8-40mm bars stay legible.
+  // 1mm = 0.42px before user zoom
   const MM_TO_PX = 0.42;
 
   // ---------------------------------------------------------------- pan/zoom
@@ -80,7 +69,6 @@
     });
 
     window.addEventListener('pointermove', (e) => {
-      // 1. Process drag pan if active
       if (panning) {
         if (Math.abs(e.clientX - lastX) > 2 || Math.abs(e.clientY - lastY) > 2) movedSinceDown = true;
         panX += (e.clientX - lastX);
@@ -90,7 +78,6 @@
         applyTransform();
       }
 
-      // 2. Process crosshair and pointer location tracking
       if (global.App.CadGrid) {
         const rect = stageEl.getBoundingClientRect();
         const isOverStage = (
@@ -151,50 +138,126 @@
     return BAR_COLOR_KEYS.reduce((best, k) => Math.abs(k - d) < Math.abs(best - d) ? k : best, BAR_COLOR_KEYS[0]);
   }
 
-  // --------------------------------------------------- effective placement
-  // (Geometry.groupPositions / Geometry.resolveBars are the shared source
-  // of truth — used identically by the calc engine in models/calc.js so a
-  // hand-dragged bar is reflected in both the drawing and the numbers.)
   const getEffectivePositions = (col, outline, edgeMap, group) => Geometry.groupPositions(col, outline, edgeMap, group);
   const getEffectiveBars = (col) => Geometry.resolveBars(col);
 
+  // --------------------------------------------------------- CAD Path Helpers
+
+  /**
+   * Generates an SVG <path> d-string for a polygon with rounded fillet bends.
+   */
+  function roundedPolygonPath(vertices, bendRadiusMm) {
+    if (!vertices || vertices.length < 3) return '';
+    const n = vertices.length;
+    const rPx = Math.max(2, bendRadiusMm * MM_TO_PX);
+    let d = '';
+
+    for (let i = 0; i < n; i++) {
+      const prev = vertices[(i - 1 + n) % n];
+      const cur = vertices[i];
+      const next = vertices[(i + 1) % n];
+
+      const v1 = { x: prev.x - cur.x, y: prev.y - cur.y };
+      const v2 = { x: next.x - cur.x, y: next.y - cur.y };
+      const len1 = Math.hypot(v1.x, v1.y) || 1;
+      const len2 = Math.hypot(v2.x, v2.y) || 1;
+
+      const offset = Math.min(rPx, len1 * MM_TO_PX * 0.4, len2 * MM_TO_PX * 0.4);
+
+      const p1 = {
+        x: cur.x * MM_TO_PX + (v1.x / len1) * (offset / MM_TO_PX),
+        y: cur.y * MM_TO_PX + (v1.y / len1) * (offset / MM_TO_PX),
+      };
+      const p2 = {
+        x: cur.x * MM_TO_PX + (v2.x / len2) * (offset / MM_TO_PX),
+        y: cur.y * MM_TO_PX + (v2.y / len2) * (offset / MM_TO_PX),
+      };
+
+      if (i === 0) {
+        d += `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} `;
+      } else {
+        d += `L ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} `;
+      }
+      d += `Q ${(cur.x * MM_TO_PX).toFixed(2)} ${(cur.y * MM_TO_PX).toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} `;
+    }
+    d += 'Z';
+    return d;
+  }
+
   // ------------------------------------------------------------------ render
 
-  /** Builds a complete <svg> for a column — the exact same drawing logic
-   *  whether it's the live interactive canvas or a static image for the
-   *  Phase 8 PDF export. `interactive: false` skips attaching drag/hover
-   *  handlers to each bar (a detached SVG has no listeners to attach
-   *  anyway) and skips the "manual override" warning-tick styling noise
-   *  that's only useful while actively editing. Returns both the <svg>
-   *  root and the resolved bar list, since callers need the latter for
-   *  the mark-legend table / BBS cross-reference. */
   function buildColumnSvg(col, opts) {
     const interactive = !opts || opts.interactive !== false;
     const { outline, bars } = getEffectiveBars(col);
     const centroid = Geometry.polygonCentroid(outline.vertices);
     const cover = col.geometry.clearCover || 40;
-    const tieDia = (col.ties && col.ties.diameter) || 8;
+    const tie = col.ties || { diameter: 8, spacingEnd: 100, spacingMiddle: 150, hook: 135 };
+    const tieDia = tie.diameter || 8;
 
     const bbox = boundsOf(outline.vertices);
-    const svgW = (bbox.w * MM_TO_PX) + 240;
-    const svgH = (bbox.h * MM_TO_PX) + 220;
+    const svgW = (bbox.w * MM_TO_PX) + 280;
+    const svgH = (bbox.h * MM_TO_PX) + 260;
     const svgRoot = svg('svg', { width: svgW, height: svgH, style: 'overflow:visible;' });
-    const group = svg('g', { transform: 'translate(40,40)' });
 
-    // --- Concrete outline + cover + tie outline ------------------------
+    // --- Defs (Hatch patterns, filters) ---
+    const defs = svg('defs');
+    
+    // Concrete Hatch Pattern (45° Diagonal Lines)
+    const hatchPat = svg('pattern', {
+      id: 'concrete-hatch',
+      width: '10', height: '10',
+      patternUnits: 'userSpaceOnUse',
+      patternTransform: 'rotate(45)'
+    });
+    hatchPat.appendChild(svg('line', {
+      x1: '0', y1: '0', x2: '0', y2: '10',
+      stroke: 'var(--border-strong)', 'stroke-width': '0.8', 'stroke-opacity': '0.35'
+    }));
+    defs.appendChild(hatchPat);
+    svgRoot.appendChild(defs);
+
+    const group = svg('g', { transform: 'translate(60, 50)' });
+
+    // --- 1. Concrete Cross-Section Fill & Hatch ---
     if (outline.isCircle) {
       const r = outline.circle.r;
+      // Solid Base Surface
       circleAt(group, r, r, r, { fill: 'var(--bg-panel-alt)', stroke: 'var(--text-primary)', 'stroke-width': 2 });
+      // Concrete Hatch Overlay
+      circleAt(group, r, r, r, { fill: 'url(#concrete-hatch)', stroke: 'none' });
+      // Clear Cover Reference Line
       circleAt(group, r, r, Math.max(0, r - cover), { fill: 'none', stroke: 'var(--annotate)', 'stroke-width': 1, 'stroke-dasharray': '4 3' });
-      circleAt(group, r, r, Math.max(0, r - cover - tieDia / 2), { fill: 'none', stroke: 'var(--text-muted)', 'stroke-width': 1.2 });
+      // Outer Tie Ring
+      const tieRadius = Math.max(0, r - cover - tieDia / 2);
+      circleAt(group, r, r, tieRadius, { fill: 'none', stroke: 'var(--text-secondary)', 'stroke-width': Math.max(1.5, tieDia * MM_TO_PX) });
     } else {
+      // Solid Concrete Base
       group.appendChild(poly(outline.vertices, { fill: 'var(--bg-panel-alt)', stroke: 'var(--text-primary)', 'stroke-width': 2 }));
+      // Concrete Hatch Pattern
+      group.appendChild(poly(outline.vertices, { fill: 'url(#concrete-hatch)', stroke: 'none' }));
+      // Clear Cover Reference Line
       group.appendChild(poly(Geometry.offsetPolygon(outline.vertices, cover), { fill: 'none', stroke: 'var(--annotate)', 'stroke-width': 1, 'stroke-dasharray': '4 3' }));
-      group.appendChild(poly(Geometry.offsetPolygon(outline.vertices, cover + tieDia / 2), { fill: 'none', stroke: 'var(--text-muted)', 'stroke-width': 1.2 }));
+      
+      // Outer Tie Ring with Filleted Corners (True Bend Radius)
+      const tieVertices = Geometry.offsetPolygon(outline.vertices, cover + tieDia / 2);
+      const tieBendRadius = Math.max(tieDia, 12);
+      const tiePathStr = roundedPolygonPath(tieVertices, tieBendRadius);
+
+      group.appendChild(svg('path', {
+        d: tiePathStr,
+        fill: 'none',
+        stroke: 'var(--text-secondary)',
+        'stroke-width': Math.max(1.5, tieDia * MM_TO_PX),
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      }));
+
+      // Draw Realistic 135° / 90° Seismic Hooks at Corner
+      addStirrupHooks(group, tieVertices, tieDia, tie.hook || 135, centroid);
     }
 
-    // --- Internal ties / cross-links layer ------------------------------
-    const intLinkType = (col.ties && col.ties.internalLinkType) || 'none';
+    // --- 2. Internal Ties / Cross-Links Layer ---
+    const intLinkType = tie.internalLinkType || 'none';
     if (intLinkType !== 'none') {
       const linkPaths = Geometry.buildInternalLinkPaths(bars, intLinkType);
       const linksLayer = svg('g', { id: 'internal-links-layer' });
@@ -202,44 +265,36 @@
       linkPaths.forEach((path) => {
         if (path.type === 'closed' && path.vertices) {
           linksLayer.appendChild(poly(path.vertices, {
-            fill: 'none',
-            stroke: 'var(--text-muted)',
-            'stroke-width': 1.2,
-            'stroke-dasharray': '3 2'
+            fill: 'none', stroke: 'var(--text-secondary)', 'stroke-width': 1.2, 'stroke-dasharray': '4 2'
           }));
         } else if (path.type === 'line' && path.start && path.end) {
           linksLayer.appendChild(svg('line', {
-            x1: path.start.x * MM_TO_PX,
-            y1: path.start.y * MM_TO_PX,
-            x2: path.end.x * MM_TO_PX,
-            y2: path.end.y * MM_TO_PX,
-            stroke: 'var(--text-muted)',
-            'stroke-width': 1.2,
-            'stroke-dasharray': '3 2'
+            x1: path.start.x * MM_TO_PX, y1: path.start.y * MM_TO_PX,
+            x2: path.end.x * MM_TO_PX, y2: path.end.y * MM_TO_PX,
+            stroke: 'var(--text-secondary)', 'stroke-width': 1.2, 'stroke-dasharray': '4 2'
           }));
         }
       });
-
       group.appendChild(linksLayer);
     }
 
-    // --- Overall dimensions --------------------------------------------
+    // --- 3. Architectural Dimension Lines ---
     if (outline.isCircle) {
-      addDim(group, 0, bbox.h * MM_TO_PX + 26, bbox.w * MM_TO_PX, `⌀ ${col.geometry.diameter} mm`);
+      addDim(group, 0, bbox.h * MM_TO_PX + 28, bbox.w * MM_TO_PX, `⌀ ${col.geometry.diameter} mm`, false);
     } else {
-      addDim(group, 0, bbox.h * MM_TO_PX + 26, bbox.w * MM_TO_PX, `${Math.round(bbox.w)} mm`);
-      addDim(group, bbox.w * MM_TO_PX + 26, 0, bbox.h * MM_TO_PX, `${Math.round(bbox.h)} mm`, true);
+      addDim(group, 0, bbox.h * MM_TO_PX + 28, bbox.w * MM_TO_PX, `${Math.round(bbox.w)} mm`, false);
+      addDim(group, bbox.w * MM_TO_PX + 28, 0, bbox.h * MM_TO_PX, `${Math.round(bbox.h)} mm`, true);
     }
 
-    // --- Centroid --------------------------------------------------------
+    // --- 4. Centroid Mark ---
     addCentroid(group, centroid.x * MM_TO_PX, centroid.y * MM_TO_PX);
 
-    // --- Bars + hover/select/drag hit targets ---------------------------
+    // --- 5. Longitudinal Bars Rendering ---
     const barsLayer = svg('g', { id: 'bars-layer' });
     bars.forEach((bar) => {
       const key = `${bar.groupId}:${bar.indexInGroup}`;
       const px = bar.x * MM_TO_PX, py = bar.y * MM_TO_PX;
-      const r = Math.max(2.4, (bar.diameter / 2) * MM_TO_PX);
+      const r = Math.max(2.5, (bar.diameter / 2) * MM_TO_PX);
       const colorKey = nearestBarColorKey(bar.diameter);
       const isSelected = interactive && key === selectedBarKey;
 
@@ -262,49 +317,187 @@
     });
     group.appendChild(barsLayer);
 
-    // --- Spacing annotation (first gap per group, to avoid clutter) -----
-    const seenGroup = new Set();
-    bars.forEach((bar) => {
-      if (bar.spacingToNext == null || seenGroup.has(bar.groupId)) return;
-      seenGroup.add(bar.groupId);
-      const groupBars = bars.filter((b) => b.groupId === bar.groupId);
-      const nextBar = groupBars[bar.indexInGroup + 1];
-      if (!nextBar) return;
-      const mx = ((bar.x + nextBar.x) / 2) * MM_TO_PX;
-      const my = ((bar.y + nextBar.y) / 2) * MM_TO_PX;
-      const t = svg('text', { x: mx, y: my - 6, 'font-size': 9.5, fill: 'var(--annotate)', 'text-anchor': 'middle', 'font-family': 'var(--font-mono)' });
-      t.textContent = `${bar.spacingToNext}`;
-      group.appendChild(t);
-    });
+    // --- 6. Stirrup / Tie Annotation Pointer ---
+    addTieCallout(group, outline, cover, tie);
 
-    // --- Bar-mark leader lines + badges (first bar of each group) -------
+    // --- 7. Longitudinal Group Leader Badges (Engineering Notation) ---
     const markedGroups = new Set();
     bars.forEach((bar) => {
       if (markedGroups.has(bar.groupId)) return;
       markedGroups.add(bar.groupId);
+
+      const groupBars = bars.filter(b => b.groupId === bar.groupId);
       const dx = bar.x - centroid.x, dy = bar.y - centroid.y;
       const len = Math.hypot(dx, dy) || 1;
       const dir = { x: dx / len, y: dy / len };
-      const barR = Math.max(2.4, (bar.diameter / 2) * MM_TO_PX);
+      const barR = Math.max(2.5, (bar.diameter / 2) * MM_TO_PX);
+
       const startX = bar.x * MM_TO_PX + dir.x * barR;
       const startY = bar.y * MM_TO_PX + dir.y * barR;
-      const endX = startX + dir.x * 20;
-      const endY = startY + dir.y * 20;
+      const endX = startX + dir.x * 24;
+      const endY = startY + dir.y * 24;
 
-      group.appendChild(svg('line', { x1: startX, y1: startY, x2: endX, y2: endY, stroke: 'var(--annotate)', 'stroke-width': 1 }));
-      group.appendChild(svg('circle', { cx: endX, cy: endY, r: 9, fill: 'var(--bg-panel)', stroke: 'var(--annotate)', 'stroke-width': 1.2 }));
-      const markText = svg('text', { x: endX, y: endY + 3.5, 'font-size': 10, fill: 'var(--annotate)', 'text-anchor': 'middle', 'font-weight': 700, 'font-family': 'var(--font-mono)' });
-      markText.textContent = bar.markNumber;
-      group.appendChild(markText);
+      // Leader Line
+      group.appendChild(svg('line', { x1: startX, y1: startY, x2: endX, y2: endY, stroke: 'var(--annotate)', 'stroke-width': 1.2 }));
+
+      // Callout Badge (e.g. #1 (4-T16))
+      const calloutText = `#${bar.markNumber} (${groupBars.length}-T${bar.diameter})`;
+      const textWidth = calloutText.length * 6.5 + 12;
+
+      const tagBg = svg('rect', {
+        x: endX - textWidth / 2, y: endY - 10, width: textWidth, height: 18, rx: 3,
+        fill: 'var(--bg-panel)', stroke: 'var(--annotate)', 'stroke-width': 1
+      });
+      const tagText = svg('text', {
+        x: endX, y: endY + 3.5, 'font-size': 9.5, fill: 'var(--annotate)',
+        'text-anchor': 'middle', 'font-weight': 700, 'font-family': 'var(--font-mono)'
+      });
+      tagText.textContent = calloutText;
+
+      group.appendChild(tagBg);
+      group.appendChild(tagText);
     });
 
-    // --- Title ------------------------------------------------------------
-    const title = svg('text', { x: 0, y: -18, fill: 'var(--text-primary)', 'font-size': 14, 'font-weight': 700, 'font-family': 'var(--font-mono)' });
-    title.textContent = `${col.name} — ${App.ColumnTypes[col.type].label} cross-section`;
-    group.appendChild(title);
+    // --- 8. Section Title Block & Engineering Stamp Header ---
+    addTitleStamp(group, col, bbox);
 
     svgRoot.appendChild(group);
     return { svgRoot, bars };
+  }
+
+  /**
+   * Draws realistic overlapping 135° / 90° Seismic Hooks wrapping around corner rebar.
+   */
+  function addStirrupHooks(group, vertices, tieDia, angleDeg, centroid) {
+    if (!vertices || vertices.length < 3) return;
+    const p0 = vertices[0]; // Top-left corner vertex
+    const px = p0.x * MM_TO_PX;
+    const py = p0.y * MM_TO_PX;
+
+    const strokeW = Math.max(1.5, tieDia * MM_TO_PX);
+    const hookLengthPx = Math.max(14, tieDia * 8 * MM_TO_PX);
+
+    // Compute inward vector toward centroid
+    const dx = (centroid.x * MM_TO_PX) - px;
+    const dy = (centroid.y * MM_TO_PX) - py;
+    const distToCenter = Math.hypot(dx, dy) || 1;
+    const dirX = dx / distToCenter;
+    const dirY = dy / distToCenter;
+
+    const rad = (angleDeg === 90 ? 90 : 135) * (Math.PI / 180);
+
+    // Tail 1: Inward bend
+    const tail1X = px + hookLengthPx * (dirX * Math.cos(rad) - dirY * Math.sin(rad));
+    const tail1Y = py + hookLengthPx * (dirX * Math.sin(rad) + dirY * Math.cos(rad));
+
+    group.appendChild(svg('line', {
+      x1: px, y1: py, x2: tail1X, y2: tail1Y,
+      stroke: 'var(--text-secondary)', 'stroke-width': strokeW, 'stroke-linecap': 'round'
+    }));
+
+    // Tail 2: Overlapping offset tail
+    const offset = strokeW + 1;
+    const px2 = px + offset;
+    const py2 = py + offset;
+    const tail2X = px2 + hookLengthPx * (dirX * Math.cos(rad + 0.1) - dirY * Math.sin(rad + 0.1));
+    const tail2Y = py2 + hookLengthPx * (dirX * Math.sin(rad + 0.1) + dirY * Math.cos(rad + 0.1));
+
+    group.appendChild(svg('line', {
+      x1: px2, y1: py2, x2: tail2X, y2: tail2Y,
+      stroke: 'var(--text-secondary)', 'stroke-width': strokeW, 'stroke-linecap': 'round'
+    }));
+  }
+
+  /**
+   * Enhanced Architectural Dimension Lines with 45° Slash Ticks & Text Badges.
+   */
+  function addDim(group, x, y, length, text, vertical) {
+    const g = svg('g', { class: 'dim-annotation' });
+    const tick = 4;
+
+    if (vertical) {
+      // Extension Lines
+      g.appendChild(svg('line', { x1: x - 6, y1: y, x2: x + 6, y2: y, stroke: 'var(--annotate)', 'stroke-width': 0.8, 'stroke-opacity': 0.6 }));
+      g.appendChild(svg('line', { x1: x - 6, y1: y + length, x2: x + 6, y2: y + length, stroke: 'var(--annotate)', 'stroke-width': 0.8, 'stroke-opacity': 0.6 }));
+
+      // Main Dimension Line
+      g.appendChild(svg('line', { x1: x, y1: y, x2: x, y2: y + length, stroke: 'var(--annotate)', 'stroke-width': 1.2 }));
+
+      // 45° Architectural Ticks
+      g.appendChild(svg('line', { x1: x - tick, y1: y + tick, x2: x + tick, y2: y - tick, stroke: 'var(--annotate)', 'stroke-width': 1.6 }));
+      g.appendChild(svg('line', { x1: x - tick, y1: y + length + tick, x2: x + tick, y2: y + length - tick, stroke: 'var(--annotate)', 'stroke-width': 1.6 }));
+
+      // Text Badge
+      const bgWidth = text.length * 7 + 10;
+      const bg = svg('rect', { x: x + 8, y: y + length / 2 - 9, width: bgWidth, height: 18, rx: 3, fill: 'var(--bg-panel)', stroke: 'var(--border)', 'stroke-width': 1 });
+      const t = svg('text', { x: x + 8 + bgWidth / 2, y: y + length / 2 + 3.5, fill: 'var(--annotate)', 'font-size': 10, 'font-weight': 700, 'text-anchor': 'middle', 'font-family': 'var(--font-mono)' });
+      t.textContent = text;
+      g.appendChild(bg); g.appendChild(t);
+    } else {
+      // Extension Lines
+      g.appendChild(svg('line', { x1: x, y1: y - 6, x2: x, y2: y + 6, stroke: 'var(--annotate)', 'stroke-width': 0.8, 'stroke-opacity': 0.6 }));
+      g.appendChild(svg('line', { x1: x + length, y1: y - 6, x2: x + length, y2: y + 6, stroke: 'var(--annotate)', 'stroke-width': 0.8, 'stroke-opacity': 0.6 }));
+
+      // Main Dimension Line
+      g.appendChild(svg('line', { x1: x, y1: y, x2: x + length, y2: y, stroke: 'var(--annotate)', 'stroke-width': 1.2 }));
+
+      // 45° Architectural Ticks
+      g.appendChild(svg('line', { x1: x - tick, y1: y + tick, x2: x + tick, y2: y - tick, stroke: 'var(--annotate)', 'stroke-width': 1.6 }));
+      g.appendChild(svg('line', { x1: x + length - tick, y1: y + tick, x2: x + length + tick, y2: y - tick, stroke: 'var(--annotate)', 'stroke-width': 1.6 }));
+
+      // Text Badge
+      const bgWidth = text.length * 7 + 10;
+      const bg = svg('rect', { x: x + length / 2 - bgWidth / 2, y: y + 8, width: bgWidth, height: 18, rx: 3, fill: 'var(--bg-panel)', stroke: 'var(--border)', 'stroke-width': 1 });
+      const t = svg('text', { x: x + length / 2, y: y + 20.5, fill: 'var(--annotate)', 'font-size': 10, 'font-weight': 700, 'text-anchor': 'middle', 'font-family': 'var(--font-mono)' });
+      t.textContent = text;
+      g.appendChild(bg); g.appendChild(t);
+    }
+    group.appendChild(g);
+  }
+
+  /**
+   * Stirrup / Tie Callout Annotation Pointer.
+   */
+  function addTieCallout(group, outline, cover, tie) {
+    const tieDia = tie.diameter || 8;
+    const spEnd = tie.spacingEnd || 100;
+    const spMid = tie.spacingMiddle || 150;
+
+    const calloutText = `T${tieDia} @ ${spEnd}/${spMid} c/c (${tie.hook || 135}° hook)`;
+
+    const startX = (outline.isCircle ? outline.circle.r * 1.5 : outline.vertices[1].x - cover) * MM_TO_PX;
+    const startY = (outline.isCircle ? outline.circle.r * 0.5 : outline.vertices[1].y + cover) * MM_TO_PX;
+    const endX = startX + 35;
+    const endY = startY - 20;
+
+    group.appendChild(svg('line', { x1: startX, y1: startY, x2: endX, y2: endY, stroke: 'var(--text-secondary)', 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
+    group.appendChild(svg('circle', { cx: startX, cy: startY, r: 2.5, fill: 'var(--text-secondary)' }));
+
+    const bgWidth = calloutText.length * 6.2 + 10;
+    const bg = svg('rect', { x: endX, y: endY - 11, width: bgWidth, height: 16, rx: 2, fill: 'var(--bg-panel)', stroke: 'var(--border)', 'stroke-width': 1 });
+    const t = svg('text', { x: endX + 5, y: endY + 1, fill: 'var(--text-secondary)', 'font-size': 9, 'font-weight': 600, 'font-family': 'var(--font-mono)' });
+    t.textContent = calloutText;
+
+    group.appendChild(bg);
+    group.appendChild(t);
+  }
+
+  /**
+   * Section Title Block & Engineering Stamp Header.
+   */
+  function addTitleStamp(group, col, bbox) {
+    const titleG = svg('g', { transform: 'translate(0, -32)' });
+
+    const t1 = svg('text', { x: 0, y: 0, fill: 'var(--text-primary)', 'font-size': 13, 'font-weight': 800, 'font-family': 'var(--font-mono)' });
+    t1.textContent = `${col.name} — ${App.ColumnTypes[col.type].label}`;
+
+    const t2 = svg('text', { x: 0, y: 15, fill: 'var(--text-muted)', 'font-size': 9.5, 'font-weight': 600, 'font-family': 'var(--font-mono)' });
+    const areaM2 = (Geometry.grossAreaMm2(col) / 1e6).toFixed(3);
+    t2.textContent = `Grade: ${col.concreteGrade} | Steel: ${col.steelGrade} | Cover: ${col.geometry.clearCover || 40}mm | Ag: ${areaM2} m²`;
+
+    titleG.appendChild(t1);
+    titleG.appendChild(t2);
+    group.appendChild(titleG);
   }
 
   function render() {
@@ -327,20 +520,6 @@
     group.appendChild(svg('circle', Object.assign({ cx: cx * MM_TO_PX, cy: cy * MM_TO_PX, r: r * MM_TO_PX }, attrs)));
   }
 
-  function addDim(group, x, y, length, text, vertical) {
-    const g = svg('g', {});
-    const a1 = vertical ? { x1: x - 4, y1: y, x2: x + 4, y2: y } : { x1: x, y1: y - 4, x2: x, y2: y + 4 };
-    const a2 = vertical ? { x1: x - 4, y1: y + length, x2: x + 4, y2: y + length } : { x1: x + length, y1: y - 4, x2: x + length, y2: y + 4 };
-    const main = vertical ? { x1: x, y1: y, x2: x, y2: y + length } : { x1: x, y1: y, x2: x + length, y2: y };
-    [main, a1, a2].forEach((l) => g.appendChild(svg('line', Object.assign(l, { stroke: 'var(--annotate)', 'stroke-width': 1 }))));
-    const t = svg('text', vertical
-      ? { x: x + 10, y: y + length / 2, fill: 'var(--annotate)', 'font-size': 11, 'font-family': 'var(--font-mono)' }
-      : { x: x + length / 2, y: y + 14, fill: 'var(--annotate)', 'font-size': 11, 'text-anchor': 'middle', 'font-family': 'var(--font-mono)' });
-    t.textContent = text;
-    g.appendChild(t);
-    group.appendChild(g);
-  }
-
   function addCentroid(group, cx, cy) {
     const g = svg('g', { stroke: 'var(--danger)', 'stroke-width': 1 });
     g.appendChild(svg('line', { x1: cx - 7, y1: cy, x2: cx + 7, y2: cy }));
@@ -355,7 +534,7 @@
     wrap.addEventListener('pointermove', (e) => { if (!dragState) moveTooltip(e); });
     wrap.addEventListener('pointerleave', () => { if (!dragState) hideTooltip(); });
     wrap.addEventListener('pointerdown', (e) => {
-      e.stopPropagation(); // never let this bubble to the pan handler
+      e.stopPropagation();
       startBarDrag(e, col, bar);
     });
   }
@@ -446,10 +625,6 @@
 
   // ---------------------------------------------------- whole-layout tools
 
-  /** Applies transformFn(point, centroid) to every group's current
-   *  effective positions and bakes the result as each group's manual
-   *  override — this is how Mirror/Rotate work on top of a mix of
-   *  auto-placed and already hand-placed groups. */
   function transformWholeLayout(col, transformFn) {
     const outline = Geometry.buildOutline(col);
     const edgeMap = Geometry.classifyEdges(outline.vertices);
@@ -464,13 +639,13 @@
     state.updateColumn(col.id, { bars: col.bars });
   }
 
-  function mirrorHorizontal(col) { // flip left-right across the vertical centerline
+  function mirrorHorizontal(col) {
     transformWholeLayout(col, (p, c) => ({ x: 2 * c.x - p.x, y: p.y }));
   }
-  function mirrorVertical(col) { // flip top-bottom across the horizontal centerline
+  function mirrorVertical(col) {
     transformWholeLayout(col, (p, c) => ({ x: p.x, y: 2 * c.y - p.y }));
   }
-  function rotate90(col, dir) { // dir: 1 = CW, -1 = CCW (screen coords, y-down)
+  function rotate90(col, dir) {
     transformWholeLayout(col, (p, c) => {
       const dx = p.x - c.x, dy = p.y - c.y;
       return dir > 0 ? { x: c.x - dy, y: c.y + dx } : { x: c.x + dy, y: c.y - dx };
@@ -590,9 +765,6 @@
     return new XMLSerializer().serializeToString(clone);
   }
 
-  /** Rasterizes any (live or detached) <svg> element to a PNG data URL.
-   *  Promise-based so the Phase 8 PDF export can await one per column
-   *  without touching the live canvas or the user's current selection. */
   function svgElementToPngDataUrl(svgEl, scaleFactor) {
     return new Promise((resolve, reject) => {
       const svgString = serializeSvgElement(svgEl);
@@ -616,10 +788,6 @@
     });
   }
 
-  /** Renders an ARBITRARY column (not necessarily the one currently
-   *  selected/shown on the live canvas) to a PNG data URL — this is what
-   *  the Phase 8 PDF report calls once per column to get its drawing,
-   *  without disturbing the user's current view or selection. */
   function getColumnPngDataUrl(col, scaleFactor) {
     const { svgRoot } = buildColumnSvg(col, { interactive: false });
     return svgElementToPngDataUrl(svgRoot, scaleFactor);
