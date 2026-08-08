@@ -171,14 +171,10 @@
   flex: 1;
   position: relative;
   overflow: hidden;
-}
-/* Adaptive CAD grid (js/ui/cadViewport.js), mounted behind #canvas-viewport
-   in DOM order — replaces the old fixed 24px CSS grid with one that keeps
-   major/minor lines legible at any zoom level. */
-#canvas-grid-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 #canvas-viewport {
   position: absolute;
@@ -283,6 +279,14 @@
 
 /* ---------- Calculations stage (Phase 6) ---------- */
 #calc-stage {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg-app);
+  padding: 20px 24px 40px;
+}
+
+/* ---------- Load Analysis stage ---------- */
+#loads-stage {
   flex: 1;
   overflow-y: auto;
   background: var(--bg-app);
