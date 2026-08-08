@@ -12,6 +12,7 @@
     const stages = {
       'cross-section': document.getElementById('canvas-stage'),
       'calculations': document.getElementById('calc-stage'),
+      'loads': document.getElementById('loads-stage'),
       'bbs': document.getElementById('bbs-stage'),
       'report': document.getElementById('report-stage'),
     };
@@ -27,6 +28,7 @@
           if (stages[key]) stages[key].style.display = (key === tab.dataset.tab) ? '' : 'none';
         });
         if (tab.dataset.tab === 'calculations') App.CalcPanel.render();
+        if (tab.dataset.tab === 'loads') App.LoadsPanel.render();
         if (tab.dataset.tab === 'bbs') App.BbsPanel.render();
         if (tab.dataset.tab === 'report') App.ReportPanel.render();
       });
@@ -69,6 +71,7 @@
     App.StatusBar.init();
     App.Canvas.init();
     App.CalcPanel.init();
+    App.LoadsPanel.init();
     App.BbsPanel.init();
     App.ReportPanel.init();
 
